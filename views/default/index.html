@@ -1,0 +1,13 @@
+{{left_sidebar_enabled,right_sidebar_enabled=False,('message' in globals())}}
+{{extend 'layout.html'}}
+
+
+<a href="/perceptioncheck/default/index">
+	<img src="/perceptioncheck/static/images/shadowrun.png" alt="My Logo" />
+</a>
+
+{{=display_title}}
+<!-- This hides the "content" label of the form. -->
+{{=A('Games', _class='btn', _href=URL('games', 'index',))}}
+
+{{=A('Wikia', _class='btn', _href=URL('wikia', 'index',))}}
