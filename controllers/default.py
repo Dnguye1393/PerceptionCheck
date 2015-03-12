@@ -25,96 +25,69 @@ def login():
 @auth.requires_login()
 def index():
         title = request.args(0) or 'Main_Page'
-        form = None
-        content = ''
-        response.title = ''
-
-        # Let's uppernice the title.  The last 'title()' below
-        # is actually a Python function, if you are wondering.
         display_title = title.title().replace('_', ' ')
 
-        
-        #find the matching page.
-        page = db(db.pagetable.title==title).select().first()
-        #if page == None:
-        #    redirect(URL('default', 'confirm', args=request.args))
-        
+        return dict(display_title=display_title)
 
-        # Get the page ID.
-        page_id = str(page.id)
+@auth.requires_login()
+def profile():
+    if not auth.is_logged_in():
+        session.flash = "You do not have permission to view this profile"
+        redirect(URL('default', 'index'))
 
-
-        # Find the most recent revision with matching page ID.  
-        r = db(db.revision.page_id == page_id).select(orderby=~db.revision.date_created).first()
-        s = r.body if r is not None else ''
-        
-        # Are we editing?
-        editing = request.vars.edit == 'true'
-        history = request.vars.history == 'true'
-        autosubmit = request.vars.autosubmit == 'true'
-
-        # This is how you can use logging, very useful.
-        logger.info("This is a request for page %r, with editing %r" %
-             (title, editing))
-
-        if editing:
-            if not auth.is_logged_in():
-                redirect(URL('default', 'login', args=request.args))
-
-            # Get first and last names
-            first_name = auth.user.first_name
-            last_name = auth.user.last_name
-
-            # We are editing.  Gets the body s of the page.
-            # Creates a form to edit the content s, with s as default.
-            form = SQLFORM.factory(Field('body', 'text',
-                label='Content',
-                default=s))
-            # You can easily add extra buttons to forms.
-            form.add_button('Cancel', URL('default', 'index', args=request.args))
-            
-            # Processes the form.
-            if form.process().accepted:
-                 db.revision.insert(page_id=page_id, auth=first_name + ' ' + last_name, body=form.vars.body)
-                 redirect(URL('default', 'index', args=request.args))
-            content = form
-        elif history:
-            # Create a page contain a list of all revisions.
-            # Ror each revision, give in reverse chronological order:
-            #   -  Author, if the user was logged in, or else IP address,
-            #      if the user who created the revision was not logged in.
-            #   - Time at which the revision was done. In the honor version
-            #     of the assignment, implement time localization (see assignment).
-            #   - C comment indicating the purpose of the revision (so when you
-            #     edit, ask for such a comment, together with the edit).
-            #   - A button that ssays revert to this revision.
-
-            # Create a SQLFORM.grid and connect to it.
-            def generate_revert_button(row):
-                # Create a new edit with the content of the revision at *row*)
-                return A('Revert to this revision', _class='btn', _href=URL('default', 'index', 
-                    args=request.args, vars=dict(edit='true', autosubmit='true')))
-            
-            # Create link to "publish revision" button.
-            links = [
-                dict(header='', body = generate_revert_button)
-                ]
-
-            # Select all revisions with page_id matching the current page.
-            query = db.revision.page_id == page_id
-             
-            # Create an SQLFORM.grid to view the revisions
-            form = SQLFORM.grid(query,
-                fields =[db.revision.auth, db.revision.date_created,
-                         db.revision.rcomment],
-                links = links,
-                csv=False)
-            content = form
+    me = db(db.cohort.user_id == auth.user_id).select().first() or None
+    if me == None:
+        if request.vars.edit != 'true':
+            redirect(URL('default', 'profile', vars=dict(edit='true')))
         else:
-            content = s
-        return dict(display_title=display_title, content=content, editing=editing, history=history, revision=r)
+            bad_access = False
+            is_mine = True
+            given_id = 0 # Guaranteed to lead to edit
+    else:
+        given_id = me.user_id if request.vars.id == None else int(request.vars.id)
+        bad_access = True
+        is_mine = (given_id == me.user_id)
+        bad_access = False
 
 
+    form = None
+    student = db(db.cohort.user_id == given_id).select().first() or None
+
+    edit = (request.vars.edit == 'true') and is_mine
+    if (edit == True):
+        form = SQLFORM.factory( Field('firstname', default = get_first_name(), label = "First Name"),
+                                Field('lastname', default = get_last_name(), label = "Last Name"),
+                                Field('Email', requires = IS_EMAIL()),
+                                Field('Biography', 'text'),
+                               )
+        #Use form w/ defaults if they already have profile
+        if(student != None):
+            form = SQLFORM.factory(
+                                Field('firstname', default = get_first_name(), label = "First Name"),
+                                Field('lastname', default = get_last_name(), label = "Last Name"),
+                                Field('Email', requires = IS_EMAIL(), default = student.email),
+                                Field('Biography', 'text'),
+                                )
+
+        form.add_button('Cancel', URL('default', 'profile'))
+        if form.process().accepted:
+            if student == None:
+                new_ID = db.cohort.insert(first_name = form.vars.firstname,
+                                            last_name = form.vars.lastname,
+                                            email = form.vars.Email,
+                                            bio = form.vars.Biography,
+                                            user_id = auth.user_id)
+                redirect(URL("default", "index"))
+            else:
+                 student.update_record(first_name = form.vars.firstname,
+                                       last_name = form.vars.lastname,
+                                       email = form.vars.Email,
+                                       bio = form.vars.Biography)
+                 redirect(URL("default", "profile"))
+    return dict(form=form,edit=edit,editBtn=((not edit) and is_mine), name = get_first_name())
+	
+	
+	
 def user():
     """ge_id = str(page.id)page_id = str(page.id)
             # We are just displaying the page

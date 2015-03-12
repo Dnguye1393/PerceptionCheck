@@ -75,20 +75,24 @@ def view():
     #request to add self to a gamwe
 	#allow GM to add people who are requesting to get into game
 	#use username to define each person
+	#finish adding Request for GM 
+	#finish delete or ignore for DM
+	#Finish Clean up for unecessary requests
     """View a post."""
     # p = db(db.games.id == request.args(0)).select().first()
     p = db.games(request.args(0)) or redirect(URL('games', 'index'))
     b = db.party(request.args(0))
     hello = db.party.campaign_title == p.campaign_title
     isjoin = request.vars.join == 'y'#Check to see if they are requesting to join the game
-    form3 = SQLFORM.grid(hello, fields = [db.party.players, db.party.requesting_to_join], user_signature=False, 
-						 sortable= False, searchable= False, csv= False,)
-# if isjoin:
-     #   db.players.update( requesting_to_join = auth.username)
-    #    
+
+    def generate_accept_button(row):
+        accept = ''
+        if auth.user_id == p.user_id:
+            accept = A('Accept Request', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(person = row.id, join= 'N', accept ='y' )  ))
+        return accept
     links = [ 
              #dict( header = '', body = generate_join_button),
-			# dict( header = '', body = generate_accept_button),
+			dict( header = '', body = generate_accept_button),
 			 ]
     form = ''
     button = ''
@@ -96,20 +100,24 @@ def view():
     form_add = ''
     if p.user_id != auth.user_id: #this is for the user, who is not the GM, to request to join
         if isjoin:
+            if db.party.players == auth.user.email:
+                session.flash = T('Already Requested.')
+                redirect(URL('games', 'view', args = [request.args(0)]))
             #If they requested to join
             #form_add = SQLFORM.grid(db.party, fields = [db.party.requesting_to_join], user_signature= False)
-            db.party.insert(campaign_title = p.campaign_title, requesting_to_join = auth.user_id)
+            db.party.insert(campaign_title = p.campaign_title, players= auth.user.email, requesting_to_join = True)
         else:
 			#have not requested to join yet
             button = A('Request to Join', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(join= 'y')  ))
     form = SQLFORM(db.games, record = p, readonly=True)
-    
+    form3 = SQLFORM.grid(hello, fields = [db.party.players, db.party.requesting_to_join, db.party.accepted], user_signature=False, 
+						 sortable= False, searchable= False, links = links, csv= False,)
     return dict(form = form, form2=form2, form_add = form_add, form3= form3, button=button)
 
 
 @auth.requires_login()
 def edit():
-    """View a post."""
+    """Edit a post."""
     show_all = request.args(0) =='all'
     # p = db(db.games.id == request.args(0)).select().first()
     p = db.games(request.args(0)) or redirect(URL('games', 'index'))

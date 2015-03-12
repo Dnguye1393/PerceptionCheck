@@ -9,22 +9,52 @@ def get_first_name():
 	if auth.user:
 		name = auth.user.first_name
 	return name
-# Format for wiki links.
+
+def get_last_name():
+    lname = ''
+    if auth.user:
+        lname = auth.user.last_name
+    return lname
+
+def get_email():
+    emailz = ''
+    if auth.user:
+        emailz = auth.user.email
+    return emailz
+
+
 EDITION = [ '1E' , '1.5E', '2E', '2.5E', '3E', '3.5E', '4E', '4.5E', '5E', '5.5E', 
 		   '6E', 'Home Brew']
 HOUSERULES = ['Yes', 'No', 'Minor Changes']
 RE_LINKS = re.compile('(<<)(.*?)(>>)')
+#
+# List of UCSC majors
 
+# Format for wiki links.
+
+
+#
+# List of cohort signed up
+#
+db.define_table('cohort',
+                Field('user_id', db.auth_user, readable = False),
+                Field('first_name', default = get_first_name() ),
+                Field('last_name', default = get_last_name() ),
+                Field('email', requires=IS_EMAIL(), default = get_email()),
+                Field('bio', 'text')
+               )
+db.cohort.id.readable = False;
 
 
 db.define_table('party', #to keep track of all the campaigns
 				  Field('campaign_title' ),
 				  Field('players'),
-				  Field('requesting_to_join'),
-				#  Field('accepted', 'boolean'),
+				  Field('requesting_to_join', 'boolean'),
+				  Field('accepted', 'boolean'),
 			   )
 db.party.id.readable= False
 db.party.campaign_title.readable= False
+
 db.define_table('games', #main data of website Controls all the games
 				Field('campaign_title'),
 				Field('user_id', db.auth_user),
@@ -63,6 +93,8 @@ db.define_table('pagetable', # Name 'page' is reserved unfortunately.
     Field('title'),
     # Complete!
     )
+
+
 
 
 
