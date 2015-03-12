@@ -51,6 +51,7 @@ db.define_table('party', #to keep track of all the campaigns
 				  Field('players'),
 				  Field('requesting_to_join', 'boolean'),
 				  Field('accepted', 'boolean'),
+				  Field('profile_id', default = db.auth_user),
 			   )
 db.party.id.readable= False
 db.party.campaign_title.readable= False
@@ -70,9 +71,9 @@ db.define_table('games', #main data of website Controls all the games
 				Field('meet_date', 'datetime'),
 				Field('description', 'text'),
 				Field('welcome_new', 'boolean'),
-				Field('open_spots'),
+				Field('open_spots', 'integer'),
 				Field('looking_for_players', 'boolean'),
-				Field('total_players'),
+				Field('total_players', 'integer'),
 				)
 
 

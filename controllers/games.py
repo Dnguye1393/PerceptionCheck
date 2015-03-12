@@ -82,36 +82,68 @@ def view():
     # p = db(db.games.id == request.args(0)).select().first()
     p = db.games(request.args(0)) or redirect(URL('games', 'index'))
     b = db.party(request.args(0))
+    destroy = request.vars.delete
     hello = db.party.campaign_title == p.campaign_title
     isjoin = request.vars.join == 'y'#Check to see if they are requesting to join the game
+    isaccepted = request.vars.accepted == 'y'
+    row_id = request.vars.person
 
     def generate_accept_button(row):
         accept = ''
         if auth.user_id == p.user_id:
-            accept = A('Accept Request', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(person = row.id, join= 'N', accept ='y' )  ))
+            accept = A('Accept Request', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(person = row.id, join= 'N', accepted ='y' )  ))
         return accept
+    def generate_profile_button(row):
+        profil = ''
+        if auth.user_id == p.user_id:
+            profil = A('Check Profile', _class= 'btn',  _href=URL('default', 'profile'))
+    def generate_del_button(row):
+        # If the item is ours we can delete it
+        b = ''
+        if auth.user_id == p.user_id:
+            b = A('Delete', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(person = row.id, delete= 'y')))
+        return b
     links = [ 
              #dict( header = '', body = generate_join_button),
 			dict( header = '', body = generate_accept_button),
+			dict(header = '', body = generate_profile_button),
+			dict(header = '', body = generate_del_button),
 			 ]
     form = ''
     button = ''
     form2 = ''
     form_add = ''
+	
+	
+    if destroy:
+        db(db.party.id == request.vars.person).delete()
+        redirect((URL('games', view, args = [request.args(0)])))
+
     if p.user_id != auth.user_id: #this is for the user, who is not the GM, to request to join
         if isjoin:
-            if db.party.players == auth.user.email:
-                session.flash = T('Already Requested.')
-                redirect(URL('games', 'view', args = [request.args(0)]))
+          #  if db.party.players == auth.user.email:
+			
+			#	if 
+				#    session.flash = T('Already Requested.')
+                  #  redirect(URL('games', 'view', args = [request.args(0)]))
             #If they requested to join
-            #form_add = SQLFORM.grid(db.party, fields = [db.party.requesting_to_join], user_signature= False)
+            form_add = SQLFORM.grid(db.party, fields = [db.party.requesting_to_join], user_signature= False)
             db.party.insert(campaign_title = p.campaign_title, players= auth.user.email, requesting_to_join = True)
         else:
 			#have not requested to join yet
             button = A('Request to Join', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(join= 'y')  ))
+			
+    if p.user_id == auth.user_id: #check to see if accept the person into the group
+        if isaccepted:
+            row = db(db.party.id==row_id).select().first()
+            row.update_record(requesting_to_join = False, accepted = True)
+			#minus one to open spots
+            redirect(URL('games', view, args = [request.args(0)]))
     form = SQLFORM(db.games, record = p, readonly=True)
     form3 = SQLFORM.grid(hello, fields = [db.party.players, db.party.requesting_to_join, db.party.accepted], user_signature=False, 
-						 sortable= False, searchable= False, links = links, csv= False,)
+						 sortable= False, searchable= False, links = links, csv= False, editable=False, deletable=False, details= False,)
+
+      #  db.gams.update_record( open_spots = open_spots - 1, total_players = total_players +1) #increment the counts
     return dict(form = form, form2=form2, form_add = form_add, form3= form3, button=button)
 
 
@@ -141,7 +173,16 @@ def delete():
         redirect(URL('games', 'index'))
     db(db.games.id == p.id).delete()
     redirect(URL('games', 'index'))
-    
+
+@auth.requires_login()
+def delete2():
+    """Deletes a post."""
+    p = db.games(request.args(0)) or redirect(URL('games', 'index'))
+    if p.user_id != auth.user_id:
+        session.flash = T('Not authorized.')
+        redirect(URL('games', 'index'))
+    db(db.party.id == row.id).delete()
+    redirect(URL('games', 'index'))
 
 def user():
     """

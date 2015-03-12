@@ -35,8 +35,8 @@ def profile():
         session.flash = "You do not have permission to view this profile"
         redirect(URL('default', 'index'))
 
-    me = db(db.cohort.user_id == auth.user_id).select().first() or None
-    if me == None:
+    user_prof= db(db.cohort.user_id == auth.user_id).select().first() or None
+    if user_prof == None:
         if request.vars.edit != 'true':
             redirect(URL('default', 'profile', vars=dict(edit='true')))
         else:
@@ -44,14 +44,14 @@ def profile():
             is_mine = True
             given_id = 0 # Guaranteed to lead to edit
     else:
-        given_id = me.user_id if request.vars.id == None else int(request.vars.id)
+        given_id = user_prof.user_id if request.vars.id == None else int(request.vars.id)
         bad_access = True
-        is_mine = (given_id == me.user_id)
+        is_mine = (given_id == user_prof.user_id)
         bad_access = False
 
 
     form = None
-    student = db(db.cohort.user_id == given_id).select().first() or None
+    cohor = db(db.cohort.user_id == given_id).select().first() or None
 
     edit = (request.vars.edit == 'true') and is_mine
     if (edit == True):
@@ -61,17 +61,17 @@ def profile():
                                 Field('Biography', 'text'),
                                )
         #Use form w/ defaults if they already have profile
-        if(student != None):
+        if(cohor != None):
             form = SQLFORM.factory(
                                 Field('firstname', default = get_first_name(), label = "First Name"),
                                 Field('lastname', default = get_last_name(), label = "Last Name"),
-                                Field('Email', requires = IS_EMAIL(), default = student.email),
+                                Field('Email', requires = IS_EMAIL(), default = cohor.email),
                                 Field('Biography', 'text'),
                                 )
 
         form.add_button('Cancel', URL('default', 'profile'))
         if form.process().accepted:
-            if student == None:
+            if cohor == None:
                 new_ID = db.cohort.insert(first_name = form.vars.firstname,
                                             last_name = form.vars.lastname,
                                             email = form.vars.Email,
@@ -79,11 +79,17 @@ def profile():
                                             user_id = auth.user_id)
                 redirect(URL("default", "index"))
             else:
-                 student.update_record(first_name = form.vars.firstname,
+                 cohor.update_record(first_name = form.vars.firstname,
                                        last_name = form.vars.lastname,
                                        email = form.vars.Email,
                                        bio = form.vars.Biography)
                  redirect(URL("default", "profile"))
+    else:
+        if(cohor != None):
+            if(cohor.user_id != auth.user_id):
+                db.cohort.last_name.readable = False
+            else: db.cohort.last_name.readable = True
+            form = SQLFORM(db.cohort, record = cohort, readonly = True)
     return dict(form=form,edit=edit,editBtn=((not edit) and is_mine), name = get_first_name())
 	
 	
