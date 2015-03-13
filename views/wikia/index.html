@@ -1,34 +1,20 @@
 {{left_sidebar_enabled,right_sidebar_enabled=False,('message' in globals())}}
 {{extend 'layout.html'}}
 
-{{block head}}
-<!-- This hides the "content" label of the form. -->
-<style>
-label#no_table_body__label { display: none; }
-</style>
-{{end}}
-
 <h1>{{=display_title}}</h1>
-<p> 
-{{if not revision == None:}}
- 
-Author: {{=revision.auth}} <br> 
-Date: {{=revision.date_created}} </p>
 
-{{pass}}
-
-{{if editing or history:}}
 {{=content}}
-{{else:}}
-{{=represent_wiki(content)}}
-<p>
-{{=A('Edit', _class='btn', _href=URL('wikia', 'index', args=request.args, vars=dict(edit='true')))}}
-{{=A('Revision history', _class='btn', _href=URL('wikia', 'index', args=request.args, vars=dict(history='true')))}}
-</p>
+
+{{if request.vars.edit != 'y' :}}
+<!-- Behavior if not in edit mode -->
+{{=A('Edit', _class= 'btn', _href = URL('default', 'index', args=[title], vars = dict(edit = 'y')))}}
+
+{{if request.args(0) != None :}}
+<!-- Button to retrun to Main Page if not on Main Page -->
+{{=A('Main Page', _class = 'btn', _href = URL('default', 'index'))}}
+{{pass}}
 {{pass}}
 
 
-<br><br>
-</p>
-{{=A( 'Home', _class='btn', _href=URL('default', 'index', args=['Main Page']))}}  
-</p>
+<!-- You need to put here buttons to see the revision history (to implement later),
+and to edit (to implement now). -->

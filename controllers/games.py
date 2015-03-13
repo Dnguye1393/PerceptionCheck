@@ -112,6 +112,7 @@ def view():
         if auth.user_id == p.user_id:
             b = A('Ignore Request', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(person = row.id, delete= 'y')))
         return b
+
     links = [ 
              #dict( header = '', body = generate_join_button),
 			dict( header = '', body = generate_accept_button),
@@ -152,10 +153,9 @@ def view():
     form = SQLFORM(db.games, record = p, readonly=True) #basic information on the game
     form3 = SQLFORM.grid(hello, fields = [db.party.players, db.party.requesting_to_join, db.party.accepted], user_signature=False, 
 						 sortable= False, searchable= False, links = links, csv= False, editable=False, deletable=False, details= False,) #Players in the party
-    
 
 
-    return dict(form = form, form2=form2, form_add = form_add, form3= form3, edit_button = edit_button, button=button)
+    return dict(form = form, form2=form2, form_add = form_add, form3= form3, edit_button = edit_button, button=button, title = p.campaign_title)
 
 
 @auth.requires_login()

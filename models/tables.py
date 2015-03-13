@@ -28,15 +28,10 @@ EDITION = [ '1E' , '1.5E', '2E', '2.5E', '3E', '3.5E', '4E', '4.5E', '5E', '5.5E
 HOUSERULES = ['Yes', 'No', 'Minor Changes']
 GAMETYPE = ['Shadowrun', 'Dungeon and Dragons', 'Savage Worlds', 'Pathfinder', 'Other']
 RE_LINKS = re.compile('(<<)(.*?)(>>)')
-#
-# List of UCSC majors
-
-# Format for wiki links.
 
 
-#
 # List of cohort signed up
-#
+
 #db.define_table('cohort',
  #               Field('user_id', db.auth_user, readable = False),
   #              Field('first_name', default = get_first_name() ),
@@ -92,26 +87,25 @@ db.games.edition.default = '5E'
 db.games.zipcode.requires = IS_MATCH('\d{5}', error_message='Put in format #####')
 
 
+
+
+# Wikia Portion taken from Homework assignemnts and Adapted for use.
+
 db.define_table('pagetable', # Name 'page' is reserved unfortunately.
-    Field('title'),
-    # Complete!
+    Field('name', 'text'),
     )
-
-
-
-
 
 db.define_table('revision',
-    Field('page_id'),
-	Field('user_id', db.auth_user, writable = False),
 	Field('campaign_title'),
-    Field('rcomment'),
-    Field('auth'),
-    Field('date_created', 'datetime', default=request.now),
+    Field('page_id', db.pagetable),
+    Field('author'),
+    Field('date_posted', 'datetime', default= datetime.utcnow()),
     Field('body', 'text'), # This is the main content of a revision.
+    #Field('comments', 'text'),
     )
-db.revision.user_id.default = auth.user_id
-db.revision.user_id.writable = db.games.user_id.readable = False
+
+db.revision.page_id.readable = False
+
 def create_wiki_links(s):
     """This function replaces occurrences of '<<polar bear>>' in the 
     wikitext s with links to default/page/polar%20bear, so the name of the 
@@ -121,23 +115,19 @@ def create_wiki_links(s):
         title = match.group(2).strip()
         # The page, instead, is a normalized lowercase version.
         page = title.lower()
-        return '[[%s %s]]' % (title, URL('wikia', 'index', args=[page]))
+        return '[[%s %s]]' % (title, URL('default', 'index', args=[page]))
     return re.sub(RE_LINKS, makelink, s)
 
 def represent_wiki(s):
     """Representation function for wiki pages.  This takes a string s
     containing markup language, and renders it in HTML, also transforming
-    the <<page>> links to links to /wikia/index/page"""
+    the <<page>> links to links to /default/index/page"""
     return MARKMIN(create_wiki_links(s))
 
 def represent_content(v, r):
     """In case you need it: this is similar to represent_wiki, 
     but can be used in db.table.field.represent = represent_content"""
     return represent_wiki(v)
-
-db.pagetable.title.requires = IS_NOT_IN_DB(db, 'page.title')
-db.revision.body.requires = IS_NOT_EMPTY()
-db
 
 # We associate the wiki representation with the body of a revision.
 db.revision.body.represent = represent_content

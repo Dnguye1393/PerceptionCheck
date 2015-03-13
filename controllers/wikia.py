@@ -1,123 +1,180 @@
-# -*- coding: utf-8 -*-
-# this file is released under public domain and you can use without limitations
-
-
 import logging
-logging.basicConfig(filename='errors.log', level=logging.DEBUG)
+from datetime import datetime
 
-
-def confirm():
-    form = FORM.confirm("Yes")
-    title = request.args(0)
-    if form.accepted:
-        page_id = db.pagetable.insert(title=title)
-        db.revision.insert(page_id=page_id, auth=auth.user.first_name + ' ' + auth.user.last_name)
-        redirect(URL('wikia', 'index', args=[title], vars=dict(edit='true')))
-#    else:
-#        redirect(URL('default', 'index'))
-
-    return dict(form=form)
-
-@auth.requires_login()
-def login():
-    redirect(URL('wikia', 'index', args=[request.args(0) or 'Main Page'], vars=dict(edit='true')))
-
-
+# Main Function
 def index():
-        title = request.args(0) or 'Main_Page'
-        form = None
-        content = ''
-        response.title = ''
+    # Title of page is reached at request.args(0)
+    title = request.args(0) or 'main page'
+    # Redirect to main page
+    if title == 'main page':
+        redirect(URL('wikia', 'index', args = [title]))
 
-        # Let's uppernice the title.  The last 'title()' below
-        # is actually a Python function, if you are wondering.
-        display_title = title.title().replace('_', ' ')
+    form = None
+    content = None
 
-        
-        #find the matching page.
-        page = db(db.pagetable.title==title).select().first()
-        #if page == None:
-        #    redirect(URL('default', 'confirm', args=request.args))
-        
+    # Taken from Luca's code
+    newpost = request.vars.newpost == 'true'
+    editing = request.vars.edit == 'true'
+    history = request.vars.history == 'true'
+    content = ''
 
-        # Get the page ID.
-        page_id = str(page.id)
+    # Required for assignment
+    edit_button = False
+
+    # Let's uppernice the title.  The last 'title()' below
+    # is actually a Python function, if you are wondering.
+    display_title = title.title()
+
+    # Selecting the most recent revision
+    page = db(db.pagetable.name == title).select().first()
+    # Assigning the proper ID address
+    page_id = page.id if page is not None else ''
+
+    # Executed if no page currently exists. Taken from @163 on Piazza
+    if page is None:
+        content = SQLFORM.confirm('Create new page?')
+        if content.accepted:
+            redirect(URL('wikia', 'index', args=[title], vars=dict(newpost='true')))
+    # Executed if revisions exist and can be edited
+    else:
+        rev = db(db.revision.page_id == page.id).select(orderby=~db.revision.date_posted).first()
+        # Below was originally not working, but Rakshit helped to fix
+        content = represent_wiki(rev.body)
+        edit_button = True
+
+    # Process for developing a new wiki page, very similar to developing a revision
+    if newpost:
+        form = SQLFORM.factory(Field('body', 'text',
+                                     label='Content',
+                                     ))
+        form.add_button('Cancel', URL('wikia', 'index', args=[title]))
+        if form.process().accepted:
+            if page is None:
+
+                ############################################################################
+                #
+                # Originally, content being set equal to rev.body was not returning a string
+                # resulting in an error when trying to compile the app. This was due to not
+                # properly inserting information into the revision, as originally the code was
+                # 'db.pagetable.insert(name=title)'. By assigning page_id to the code just
+                # mentioned, you properly establish the content to the ID of the page being
+                # worked on and save it for later use.
+                #
+                ############################################################################
+
+                page_id=db.pagetable.insert(name=title)
+                db.revision.insert(body=form.vars.body, page_id=page_id)
+            redirect(URL('wikia', 'index', args=[title]))
+        content = form
+
+    # Process for developing a revision, very similar to developing a new wiki page
+    # Help was received from Rakshit Agrawal, the TA for CMPS 183
+    if editing:
+        rev = db(db.revision.page_id == page.id).select(orderby=~db.revision.date_posted).first()
+        form = SQLFORM.factory(Field('body', 'text',
+                                     label='Content',
+                                     wikia= rev.body,
+                                     ),
+                               Field('comments', 'text',
+                                     label='Comment',
+                                     wikia= rev.comments,))
+        form.add_button('Cancel', URL('wikia', 'index', args=[title]))
+        if form.process().accepted:
+            author = ''
+            if auth.user == None:
+                author = request.client
+            else:
+                author = auth.user.first_name
+            db.revision.insert(body=form.vars.body, page_id=page.id, comments=form.vars.comments, author=author)
+            redirect(URL('wikia', 'index', args=[title]))
+        content = form
+
+    if history:
+        def generate_revert_button(row):
+            b = SQLFORM.confirm('Revert to this Revision')
+            if b.accepted:
+                author = ''
+                if  auth.user == None:
+                    author = request.client
+                else:
+                    author = auth.user.first_name
+                f = "%d-%m-%Y %H:%M:%S"
+                comment = "Reverted to " + row.date_posted.strftime(f) + " UTC"
+                db.revision.insert(body=row.body, page_id=row.page_id, editior_comment=comment, author=author)
+                redirect(URL('wikia', 'index', args =[title]))
+            return b
+
+        links = [
+            dict(header='', body = generate_revert_button),
+        ]
+        table = db.revision
+        gah = table.page_id
+        q = gah == page.id
+
+        form = SQLFORM.grid(q, args=request.args,
+            fields=[db.revision.author, db.revision.date_posted,
+            db.revision.comments],
+            editable = False, deletable=False,
+            links=links,
+            paginate=10,
+            details = False,
+        )
+        content = form
+
+    # Return the title, content, declaration of the state of the page (newpost), and functionality to edit to the index view
+    return dict(display_title=display_title, content=content, title=title,  newpost=newpost, edit_button=edit_button)
 
 
-        # Find the most recent revision with matching page ID.  
-        r = db(db.revision.page_id == page_id).select(orderby=~db.revision.date_created).first()
-        s = r.body if r is not None else ''
-        
-        # Are we editing?
-        editing = request.vars.edit == 'true'
-        history = request.vars.history == 'true'
-        autosubmit = request.vars.autosubmit == 'true'
+def test():
+    """This controller is here for testing purposes only.
+    Feel free to leave it in, but don't make it part of your wiki.
+    """
+    title = "This is the wiki's test page"
+    form = None
+    content = None
 
-        # This is how you can use logging, very useful.
-        logger.info("This is a request for page %r, with editing %r" %
-             (title, editing))
+    # Let's uppernice the title.  The last 'title()' below
+    # is actually a Python function, if you are wondering.
+    display_title = title.title()
 
-        if editing:
-            if not auth.is_logged_in():
-                redirect(URL('wikia', 'login', args=request.args))
-
-            # Get first and last names
-            first_name = auth.user.first_name
-            last_name = auth.user.last_name
-
-            # We are editing.  Gets the body s of the page.
-            # Creates a form to edit the content s, with s as wikia.
-            form = SQLFORM.factory(Field('body', 'text',
-                label='Content',
-                wikia=s))
-            # You can easily add extra buttons to forms.
-            form.add_button('Cancel', URL('wikia', 'index', args=request.args))
-            
-            # Processes the form.
-            if form.process().accepted:
-                 db.revision.insert(page_id=page_id, auth=first_name + ' ' + last_name, body=form.vars.body)
-                 redirect(URL('wikia', 'index', args=request.args))
-            content = form
-        elif history:
-            # Create a page contain a list of all revisions.
-            # Ror each revision, give in reverse chronological order:
-            #   -  Author, if the user was logged in, or else IP address,
-            #      if the user who created the revision was not logged in.
-            #   - Time at which the revision was done. In the honor version
-            #     of the assignment, implement time localization (see assignment).
-            #   - C comment indicating the purpose of the revision (so when you
-            #     edit, ask for such a comment, together with the edit).
-            #   - A button that ssays revert to this revision.
-
-            # Create a SQLFORM.grid and connect to it.
-            def generate_revert_button(row):
-                # Create a new edit with the content of the revision at *row*)
-                return A('Revert to this revision', _class='btn', _href=URL('wikia', 'index', 
-                    args=request.args, vars=dict(edit='true', autosubmit='true')))
-            
-            # Create link to "publish revision" button.
-            links = [
-                dict(header='', body = generate_revert_button)
-                ]
-
-            # Select all revisions with page_id matching the current page.
-            query = db.revision.page_id == page_id
-             
-            # Create an SQLFORM.grid to view the revisions
-            form = SQLFORM.grid(query,
-                fields =[db.revision.auth, db.revision.date_created,
-                         db.revision.rcomment],
-                links = links,
-                csv=False)
-            content = form
-        else:
-            content = s
-        return dict(display_title=display_title, content=content, editing=editing, history=history, revision=r)
+    # Gets the body s of the page.
+    r = db.testpage(1)
+    s = r.body if r is not None else ''
+    # Are we editing?
+    editing = request.vars.edit == 'true'
+    # This is how you can use logging, very useful.
+    logger.info("This is a request for page %r, with editing %r" %
+                 (title, editing))
+    if editing:
+        # We are editing.  Gets the body s of the page.
+        # Creates a form to edit the content s, with s as wikia.
+        form = SQLFORM.factory(Field('body', 'text',
+                                     label='Content',
+                                     wikia=s
+                                     ))
+        # You can easily add extra buttons to forms.
+        form.add_button('Cancel', URL('wikia', 'test'))
+        # Processes the form.
+        if form.process().accepted:
+            # Writes the new content.
+            if r is None:
+                # First time: we need to insert it.
+                db.testpage.insert(id=1, body=form.vars.body)
+            else:
+                # We update it.
+                r.update_record(body=form.vars.body)
+            # We redirect here, so we get this page with GET rather than POST,
+            # and we go out of edit mode.
+            redirect(URL('wikia', 'test'))
+        content = form
+    else:
+        # We are just displaying the page
+        content = s
+    return dict(display_title=display_title, content=content, editing=editing)
 
 
 def user():
-    """ge_id = str(page.id)page_id = str(page.id)
-            # We are just displaying the page
+    """
     exposes:
     http://..../[app]/default/user/login
     http://..../[app]/default/user/logout
@@ -152,7 +209,8 @@ def call():
     """
     return service()
 
-@auth.requires_login() 
+
+@auth.requires_login()
 def api():
     """
     this is example of API with access control
