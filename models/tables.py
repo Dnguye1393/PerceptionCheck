@@ -26,6 +26,7 @@ def get_email():
 EDITION = [ '1E' , '1.5E', '2E', '2.5E', '3E', '3.5E', '4E', '4.5E', '5E', '5.5E', 
 		   '6E', 'Home Brew']
 HOUSERULES = ['Yes', 'No', 'Minor Changes']
+GAMETYPE = ['Shadowrun', 'Dungeon and Dragons', 'Savage Worlds', 'Pathfinder', 'Other']
 RE_LINKS = re.compile('(<<)(.*?)(>>)')
 #
 # List of UCSC majors
@@ -36,14 +37,14 @@ RE_LINKS = re.compile('(<<)(.*?)(>>)')
 #
 # List of cohort signed up
 #
-db.define_table('cohort',
-                Field('user_id', db.auth_user, readable = False),
-                Field('first_name', default = get_first_name() ),
-                Field('last_name', default = get_last_name() ),
-                Field('email', requires=IS_EMAIL(), default = get_email()),
-                Field('bio', 'text')
-               )
-db.cohort.id.readable = False;
+#db.define_table('cohort',
+ #               Field('user_id', db.auth_user, readable = False),
+  #              Field('first_name', default = get_first_name() ),
+   #             Field('last_name', default = get_last_name() ),
+    #            Field('email', requires=IS_EMAIL(), default = get_email()),
+     #           Field('bio', 'text')
+      #         )
+#db.cohort.id.readable = False;
 
 
 db.define_table('party', #to keep track of all the campaigns
@@ -62,7 +63,7 @@ db.define_table('games', #main data of website Controls all the games
 				Field('game'), #Replace with an Ajax search
 				Field('edition'),
 				Field('game_master'),
-				Field('players'),
+				#Field('players'),
 				Field('meeting_location'), #make more extesnive
 				Field('zipcode'),
 				Field('house_rules'),
@@ -73,7 +74,7 @@ db.define_table('games', #main data of website Controls all the games
 				Field('welcome_new', 'boolean'),
 				Field('open_spots', 'integer'),
 				Field('looking_for_players', 'boolean'),
-				Field('total_players', 'integer'),
+				Field('maximum_amount_of_players', 'integer'),
 				)
 
 
@@ -83,7 +84,8 @@ db.games.id.readable= False
 db.games.game_master.default = get_first_name()
 db.games.edition.requires = IS_IN_SET(EDITION)
 db.games.house_rules.requires = IS_IN_SET(HOUSERULES)
-db.games.players.writable = False #okay for now
+db.games.game.requires = IS_IN_SET(GAMETYPE)
+#db.games.players.writable = False #okay for now
 db.games.looking_for_players.default = False
 db.games.house_rules.default = 'No'
 db.games.edition.default = '5E'

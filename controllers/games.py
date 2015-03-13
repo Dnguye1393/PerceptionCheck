@@ -78,51 +78,61 @@ def view():
 	#finish adding Request for GM 
 	#finish delete or ignore for DM
 	#Finish Clean up for unecessary requests
+	#add Link to wikia
     """View a post."""
     # p = db(db.games.id == request.args(0)).select().first()
-    p = db.games(request.args(0)) or redirect(URL('games', 'index'))
-    b = db.party(request.args(0))
-    destroy = request.vars.delete
-    hello = db.party.campaign_title == p.campaign_title
+    p = db.games(request.args(0)) or redirect(URL('games', 'index')) #keep track of info from pervious page
+    b = db.party(request.args(0)) #keep track of info on this page
+    openspots = p.open_spots #number of spots open
+    destroy = request.vars.delete #delete function
+    hello = db.party.campaign_title == p.campaign_title #makeing sure ot match the right campaign
     isjoin = request.vars.join == 'y'#Check to see if they are requesting to join the game
-    isaccepted = request.vars.accepted == 'y'
-    row_id = request.vars.person
-
+    isaccepted = request.vars.accepted == 'y' #check to see if accepted var is y
+    row_id = request.vars.person #row id 
+	
+	
+    edit_button = '' #edit button for the GM
+    if p.user_id == auth.user_id:
+        edit_button = A('Edit', _class='btn', _href=URL('games', 'edit', args=[p.id]))
+		
+		
+		
     def generate_accept_button(row):
-        accept = ''
+        accept = '' #if the GM accepts a person
         if auth.user_id == p.user_id:
             accept = A('Accept Request', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(person = row.id, join= 'N', accepted ='y' )  ))
         return accept
-    def generate_profile_button(row):
-        profil = ''
-        if auth.user_id == p.user_id:
-            profil = A('Check Profile', _class= 'btn',  _href=URL('default', 'profile'))
+ #   def generate_profile_button(row):
+  #      profil = '' #if a Gm wants to check a person's profile. I don't want random people to check other people's profiles
+   #     if auth.user_id == p.user_id:
+    #        profil = A('Check Profile', _class= 'btn',  _href=URL('default', 'profile', vars = dict(id=b.profile_id)))
     def generate_del_button(row):
         # If the item is ours we can delete it
         b = ''
         if auth.user_id == p.user_id:
-            b = A('Delete', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(person = row.id, delete= 'y')))
+            b = A('Ignore Request', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(person = row.id, delete= 'y')))
         return b
     links = [ 
              #dict( header = '', body = generate_join_button),
 			dict( header = '', body = generate_accept_button),
-			dict(header = '', body = generate_profile_button),
+			#dict(header = '', body = generate_profile_button),
 			dict(header = '', body = generate_del_button),
 			 ]
     form = ''
     button = ''
     form2 = ''
     form_add = ''
-	
-	
+    openNumSpotsInc = lambda b: b+1
+    openNumSpotsDec = lambda b: b-1
+
     if destroy:
         db(db.party.id == request.vars.person).delete()
+        p.update_record( open_spots = openNumSpotsInc(openspots)) #increment the counts
         redirect((URL('games', view, args = [request.args(0)])))
 
     if p.user_id != auth.user_id: #this is for the user, who is not the GM, to request to join
         if isjoin:
           #  if db.party.players == auth.user.email:
-			
 			#	if 
 				#    session.flash = T('Already Requested.')
                   #  redirect(URL('games', 'view', args = [request.args(0)]))
@@ -132,19 +142,20 @@ def view():
         else:
 			#have not requested to join yet
             button = A('Request to Join', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(join= 'y')  ))
-			
-    if p.user_id == auth.user_id: #check to see if accept the person into the group
-        if isaccepted:
-            row = db(db.party.id==row_id).select().first()
-            row.update_record(requesting_to_join = False, accepted = True)
+    if isaccepted:		
+        if p.user_id == auth.user_id: #check to see if accept the person into the group
+            changing = db(db.party.id==row_id).select().first()
+            p.update_record(open_spots = openNumSpotsDec(openspots)) #decrease number of Open spots
+            changing.update_record(requesting_to_join = False, accepted = True)
 			#minus one to open spots
             redirect(URL('games', view, args = [request.args(0)]))
-    form = SQLFORM(db.games, record = p, readonly=True)
+    form = SQLFORM(db.games, record = p, readonly=True) #basic information on the game
     form3 = SQLFORM.grid(hello, fields = [db.party.players, db.party.requesting_to_join, db.party.accepted], user_signature=False, 
-						 sortable= False, searchable= False, links = links, csv= False, editable=False, deletable=False, details= False,)
+						 sortable= False, searchable= False, links = links, csv= False, editable=False, deletable=False, details= False,) #Players in the party
+    
 
-      #  db.gams.update_record( open_spots = open_spots - 1, total_players = total_players +1) #increment the counts
-    return dict(form = form, form2=form2, form_add = form_add, form3= form3, button=button)
+
+    return dict(form = form, form2=form2, form_add = form_add, form3= form3, edit_button = edit_button, button=button)
 
 
 @auth.requires_login()
