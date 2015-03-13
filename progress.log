@@ -988,3 +988,10 @@
 [2015-03-13 05:03:01] EDIT perceptioncheck/views/messaging/inbox.html: 0
 [2015-03-13 05:03:41] EDIT perceptioncheck/models/tables.py: 0
 [2015-03-13 05:03:53] EDIT perceptioncheck/controllers/messaging.py: 0
+[2015-03-13 05:10:22] EDIT perceptioncheck/controllers/messaging.py: 0
+[2015-03-13 05:10:42] EDIT perceptioncheck/controllers/messaging.py: 0
+[2015-03-13 05:14:28] EDIT perceptioncheck/views/default/index.html: 3
+[2015-03-13 05:16:00] EDIT perceptioncheck/controllers/messaging.py: -4
+[2015-03-13 05:16:10] EDIT perceptioncheck/views/default/index.html: -1
+[2015-03-13 05:16:35] DELETE perceptioncheck/views/messaging/outbox.html: -8
+[2015-03-13 05:18:44] EDIT perceptioncheck/models/tables.py: 0

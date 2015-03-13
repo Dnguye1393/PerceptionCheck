@@ -139,7 +139,7 @@ db.revision.body.represent = represent_content
 #messaging system
 
 db.define_table('mssging',
-    Field('fromid', db.auth_user, default=auth.user_id, readable=False, writable=False),
+    Field('sender_id', db.auth_user, default=auth.user_id, readable=False, writable=False),
     Field('reciever_id', db.auth_user, readable=False),
     Field('timesent', 'datetime', default=request.now, readable=False, writable=False),
     Field('subject','string', length=255),
@@ -149,5 +149,3 @@ db.define_table('mssging',
     )
 
 db.mssging.reciever_id.requires=IS_IN_DB(db, db.auth_user.id,'%(username)s')
-#db.mssging.fromid.default=auth.user.id
-#db.mssging.fromid.requires=IS_IN_DB(db, auth.user.idmssging
