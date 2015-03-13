@@ -41,14 +41,15 @@ response.generic_patterns = ['*'] if request.is_local else []
 ## (more options discussed in gluon/tools.py)
 #########################################################################
 
-from gluon.tools import Auth, Service, PluginManager
-
+from gluon.tools import Mail, Auth, Crud, Service, PluginManager, prettydate
+mail = Mail()                                  # mailer
 auth = Auth(db)
 ## after auth = Auth(db)
 db.define_table(
     auth.settings.table_user_name,
     Field('first_name', length=128, default=''),
     Field('last_name', length=128, default=''),
+    Field('username'),
     Field('email', length=128, default='', unique=True, requires = IS_EMAIL(error_message='invalid email!')), # required
     Field('password', 'password', length=512,            # required
           readable=False, label='Password'),
@@ -64,7 +65,7 @@ db.define_table(
           writable=False, readable=False, default=''))
 
 
-
+crud = Crud(db)                                # for CRUD helpers using auth
 service = Service()
 plugins = PluginManager()
 
