@@ -37,7 +37,7 @@ db.define_table('profiling',
                 Field('user_id', db.auth_user, writable= False, readable = False),
                 Field('first_name', default = get_first_name() ),
                 Field('last_name', default = get_last_name() ),
-				Field('email', default = get_email()),
+				Field('email', default = get_email()), #used as the main identifier as well as to show for messaging
                 Field('bio', 'text', default = 'Talk about yourself')
                )
 db.profiling.id.readable = False;
@@ -48,11 +48,14 @@ db.profiling.user_id.readable = False;
 db.define_table('party', #to keep track of all the campaigns
 				  Field('campaign_title' ),
 				  Field('players'),
+                  Field('user_id', db.auth_user),
 				  Field('requesting_to_join', 'boolean'),
 				  Field('accepted', 'boolean'),
 				  Field('profile_id', default = db.auth_user),
 			   )
 db.party.id.readable= False
+db.party.user_id.readable= False
+db.party.user_id.writable = False
 db.party.campaign_title.readable= False
 
 db.define_table('games', #main data of website Controls all the games

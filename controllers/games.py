@@ -102,10 +102,11 @@ def view():
         if auth.user_id == p.user_id:
             accept = A('Accept Request', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(person = row.id, join= 'N', accepted ='y' )  ))
         return accept
- #   def generate_profile_button(row):
-  #      profil = '' #if a Gm wants to check a person's profile. I don't want random people to check other people's profiles
-   #     if auth.user_id == p.user_id:
-    #        profil = A('Check Profile', _class= 'btn',  _href=URL('default', 'profile', vars = dict(id=b.profile_id)))
+  #  def generate_profile_button(row):
+     #   profil = '' #if a Gm wants to check a person's profile. I don't want random people to check other people's profiles
+     #   if auth.user_id == p.user_id:
+         #   userz = row.email == 
+        #    profil = A('Check Profile', _class= 'btn',  _href=URL('default', 'profile', vars = dict(id=b.profile_id)))
     def generate_del_button(row):
         # If the item is ours we can delete it
         b = ''

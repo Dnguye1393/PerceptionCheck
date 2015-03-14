@@ -44,16 +44,17 @@ def profile():
   #  if profile_id is None: # check to see accessed not from view
  #       profile_id = auth.user_id
         
-    profile_base = db.profiling.user_id == profile_id #gets the specific profile
+    profile_base =(db.profiling.email == request.args(0))#gets the specific profile
 #    if profile_base is None: # if new profile
  #       redirect(URL('default', 'new'))
-    
+    form = SQLFORM.grid(profile_base, fields=[db.profiling.first_name, db.profiling.last_name, db.profiling.email, db.profiling.bio],
+                        deletable = False, csv=False,)
     
  #   if editing:
   #      redirect(URL('default', 'edit', args=[profile_id]))
 
     #if normal view
-    form= SQLFORM(db.profiling, readonly = True) #view it
+     #view it
 
     return dict(form=form, editing = editing)
 	
