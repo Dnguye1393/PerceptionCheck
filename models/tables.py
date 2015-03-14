@@ -30,16 +30,19 @@ GAMETYPE = ['Shadowrun', 'Dungeon and Dragons', 'Savage Worlds', 'Pathfinder', '
 RE_LINKS = re.compile('(<<)(.*?)(>>)')
 
 
-# List of cohort signed up
+#
+# Profiles for people to view.
+#
+db.define_table('profiling',
+                Field('user_id', db.auth_user, writable= False, readable = False),
+                Field('first_name', default = get_first_name() ),
+                Field('last_name', default = get_last_name() ),
+				Field('email', default = get_email()),
+                Field('bio', 'text', default = 'Talk about yourself')
+               )
+db.profiling.id.readable = False;
+db.profiling.user_id.readable = False;
 
-#db.define_table('cohort',
- #               Field('user_id', db.auth_user, readable = False),
-  #              Field('first_name', default = get_first_name() ),
-   #             Field('last_name', default = get_last_name() ),
-    #            Field('email', requires=IS_EMAIL(), default = get_email()),
-     #           Field('bio', 'text')
-      #         )
-#db.cohort.id.readable = False;
 
 
 db.define_table('party', #to keep track of all the campaigns
@@ -115,7 +118,7 @@ def create_wiki_links(s):
         title = match.group(2).strip()
         # The page, instead, is a normalized lowercase version.
         page = title.lower()
-        return '[[%s %s]]' % (title, URL('default', 'index', args=[page]))
+        return '[[%s %s]]' % (title, URL('wikia', 'index', args=[page]))
     return re.sub(RE_LINKS, makelink, s)
 
 def represent_wiki(s):

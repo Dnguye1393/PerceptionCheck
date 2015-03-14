@@ -26,10 +26,58 @@ def login():
 def index():
         title = request.args(0) or 'Main_Page'
         display_title = title.title().replace('_', ' ')
-
-        return dict(display_title=display_title)
+        editing = auth.user_id
+        return dict(display_title=display_title, editing=editing)
 
 	
+	
+	
+@auth.requires_login()
+def profile():
+	#Profile will ahve their name and Email adress
+	#will have a Preferred type of game Games
+	#will have Bio ,or a background to allwo DM to get insight onto their player
+    profile_id = request.vars.profile_id
+    editing = request.args(0)
+    form = ''
+    profile_base = ''
+  #  if profile_id is None: # check to see accessed not from view
+ #       profile_id = auth.user_id
+        
+    profile_base = db.profiling.user_id == profile_id #gets the specific profile
+#    if profile_base is None: # if new profile
+ #       redirect(URL('default', 'new'))
+    
+    
+ #   if editing:
+  #      redirect(URL('default', 'edit', args=[profile_id]))
+
+    #if normal view
+    form= SQLFORM(db.profiling, readonly = True) #view it
+
+    return dict(form=form, editing = editing)
+	
+	
+@auth.requires_login()
+def new():
+    """Add a profile."""
+    form = SQLFORM(db.profiling)
+    if form.process().accepted:
+        # Successful processing.
+        session.flash = T("inserted")
+        redirect(URL('default', 'index'))
+    return dict(form=form)
+	
+@auth.requires_login()
+def edit():
+    """Edit a profile."""
+    p = db.profiling(request.args(0)) #or redirect(URL('default', 'index'))
+    form = SQLFORM(db.profiling, record=p)
+    if form.process().accepted:
+        session.flash = T('Updated')
+        redirect(URL('default', 'view', args= request.args(0)))
+    # p.name would contain the name of the poster.
+    return dict(form=form, editing=request.args(0))
 def user():
     """ge_id = str(page.id)page_id = str(page.id)
             # We are just displaying the page
