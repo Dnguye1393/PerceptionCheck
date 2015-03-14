@@ -129,7 +129,10 @@ def view():
 
     if destroy:
         db(db.party.id == request.vars.person).delete()
-        p.update_record( open_spots = openNumSpotsInc(openspots)) #increment the counts
+        var = db(db.party.id == request.vars.person).select(db.party.accepted)
+        
+        if var:
+            p.update_record( open_spots = openNumSpotsInc(openspots)) #increment the counts
         redirect((URL('games', view, args = [request.args(0)])))
 
     if p.user_id != auth.user_id: #this is for the user, who is not the GM, to request to join
