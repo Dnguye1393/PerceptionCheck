@@ -1,13 +1,19 @@
 {{left_sidebar_enabled,right_sidebar_enabled=False,('message' in globals())}}
 {{extend 'layout.html'}}
 
+<head>
+<style>
+body {
+    background-color: white;
+}
+h1 {
+    color: blue;
+    margin-left: 40px;
+} 
+</style>
+</head>
 
-<a href="/perceptioncheck/default/index">
-	<img src="/perceptioncheck/static/images/shadowrun.png" alt="My Logo" />
-</a>
 
-{{=display_title}}
-<!-- This hides the "content" label of the form. -->
 {{=A('Games', _class='btn', _href=URL('games', 'index',))}}
 {{=A('Inbox', _class='btn', _href=URL('messaging', 'inbox',))}}
 {{=A('Message', _class='btn', _href=URL('messaging', 'create',))}}
