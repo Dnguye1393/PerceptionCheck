@@ -26,7 +26,7 @@ def login():
 def index():
         title = request.args(0) or 'Main_Page'
         display_title = title.title().replace('_', ' ')
-        editing = auth.user_id
+        editing = auth.user.email
         return dict(display_title=display_title, editing=editing)
 
 	
@@ -37,26 +37,27 @@ def profile():
 	#Profile will ahve their name and Email adress
 	#will have a Preferred type of game Games
 	#will have Bio ,or a background to allwo DM to get insight onto their player
-    profile_id = request.vars.profile_id
-    editing = request.args(0)
-    form = ''
-    profile_base = ''
+
+
+    emailz = request.args(0)
+    p = db.profiling(db.profiling.email == emailz)#or redirect(URL('default', 'index'))
+    form = SQLFORM(db.profiling, record=p, readonly=True)
   #  if profile_id is None: # check to see accessed not from view
  #       profile_id = auth.user_id
         
-    profile_base =(db.profiling.email == request.args(0))#gets the specific profile
+  #  profile_base =(db.profiling.email == request.args(0))#gets the specific profile
 #    if profile_base is None: # if new profile
  #       redirect(URL('default', 'new'))
-    form = SQLFORM.grid(profile_base, fields=[db.profiling.first_name, db.profiling.last_name, db.profiling.email, db.profiling.bio],
-                        deletable = False, csv=False,)
-    
+   # form = SQLFORM(profile_base, fields=[db.profiling.first_name, db.profiling.last_name, db.profiling.email, db.profiling.bio],
+        #                deletable = False, csv=False,)
+   # form = SQLFORM(db.profiling, readonly= True)
  #   if editing:
   #      redirect(URL('default', 'edit', args=[profile_id]))
 
     #if normal view
      #view it
 
-    return dict(form=form, editing = editing)
+    return dict(form=form, editing = emailz)
 	
 	
 @auth.requires_login()
@@ -72,13 +73,26 @@ def new():
 @auth.requires_login()
 def edit():
     """Edit a profile."""
-    p = db.profiling(request.args(0)) #or redirect(URL('default', 'index'))
+    emailz = request.args(0)
+    p = db.profiling(db.profiling.email == emailz)#or redirect(URL('default', 'index'))
     form = SQLFORM(db.profiling, record=p)
+    #form = SQLFORM.factory(Field('First_Name', default = p.first_name),
+     #                      Field('Last_Name', default = p.last_name),
+      #                     Field('Email', default = p.email),
+       #                    Field('bio', default= p.bio,),
+        #                   table_name = 'Profile')
+    
+    
     if form.process().accepted:
+        p.update_record(**dict(form.vars))
+        #db(p).update(first_name = form.vars.First_Name)
+        #db(p).update(last_name = form.vars.Last_Name)
+        #db(p).update(email = form.vars.Email)
+        #db(p).update(bio = form.vars.bio)
         session.flash = T('Updated')
-        redirect(URL('default', 'view', args= request.args(0)))
+        redirect(URL('default', 'profile', args=(auth.user.email)))
     # p.name would contain the name of the poster.
-    return dict(form=form, editing=request.args(0))
+    return dict(form=form, editing=emailz)
 def user():
     """ge_id = str(page.id)page_id = str(page.id)
             # We are just displaying the page
