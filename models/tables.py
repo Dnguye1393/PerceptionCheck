@@ -51,11 +51,13 @@ db.define_table('party', #to keep track of all the campaigns
                   Field('user_id', db.auth_user),
 				  Field('requesting_to_join', 'boolean'),
 				  Field('accepted', 'boolean'),
+                  Field('email', default = get_email()),
 				  Field('profile_id', default = db.auth_user),
 			   )
 db.party.id.readable= False
 db.party.user_id.readable= False
 db.party.user_id.writable = False
+#db.party.email.readable=False
 db.party.campaign_title.readable= False
 
 db.define_table('games', #main data of website Controls all the games

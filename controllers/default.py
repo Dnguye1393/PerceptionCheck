@@ -37,11 +37,20 @@ def profile():
 	#Profile will ahve their name and Email adress
 	#will have a Preferred type of game Games
 	#will have Bio ,or a background to allwo DM to get insight onto their player
-
-
-    emailz = request.args(0)
+    
+    emailCheck = request.vars.peremail
+    emailz= ''
+    if emailCheck is None:
+        emailz = request.args(0)
+    else:
+        emailz = emailCheck
+        
+        
     p = db.profiling(db.profiling.email == emailz)#or redirect(URL('default', 'index'))
     form = SQLFORM(db.profiling, record=p, readonly=True)
+    editButton = ''
+    if p.email == auth.user.email:
+        editButton = A('Edit Profile', _class='btn', _href=URL('default', 'edit', args=[emailz]))
   #  if profile_id is None: # check to see accessed not from view
  #       profile_id = auth.user_id
         
@@ -57,7 +66,7 @@ def profile():
     #if normal view
      #view it
 
-    return dict(form=form, editing = emailz)
+    return dict(form=form, editing = emailz, editButton = editButton)
 	
 	
 @auth.requires_login()
