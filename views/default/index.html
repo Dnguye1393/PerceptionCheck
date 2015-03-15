@@ -3,18 +3,37 @@
 
 <head>
 <style>
-body {
-    background-color: white;
+div.background {
+    background: url("{{=URL('static','images/diceme.png')}}") repeat;
+    border: 1px solid black; <!-- image from http://6dollarshirts.com/tt/det/08-28-2012_Choose_Your_Weapon_T_SHIRT_det.gif-->
 }
-h1 {
-    color: blue;
-    margin-left: 40px;
-} 
+
+div.transbox {
+    margin: 30px;
+    background-color: #ffffff;
+    border: 1px solid black;
+    opacity: 0.6
+    filter: alpha(opacity=60); /* For IE8 and earlier */
+}
+
+div.transbox p {
+    margin: 5%;
+    font-weight: bold;
+    color: #000000;
+    font-size: 25px;
+    font-family: "Arial", Arial, sans-serif;
+}
 </style>
 </head>
+<body>
 
+<div class="background">
+  <div class="transbox">
+    <p>Welcome To Perception Check. Where you can attempt to Games for you!</p>
+  </div>
+</div>
 
-{{=A('Games', _class='btn', _href=URL('games', 'index',))}}
+{{=A('Find A Games', _class='btn', _href=URL('games', 'index',))}}
 {{=A('Inbox', _class='btn', _href=URL('messaging', 'inbox',))}}
 {{=A('Message', _class='btn', _href=URL('messaging', 'create',))}}
 

@@ -34,18 +34,18 @@ def index():
     else:
         button = A('See All Games', _class='btn', _href=URL('games', 'index', args=['all']))
 
-    if len(request.args) == 0:
+  #  if len(request.args) == 0:
         # We are in the main index.
-        links.append(dict(header='Post', body = shorten_post))
-        db.games.description.readable = False
+   #     links.append(dict(header='Post', body = shorten_post))
+      #  db.games.description.readable = False
     start_idx = 1 if show_all else 0
    # form = SQLFORM.grid(q, args=request.args[:start_idx],
     #form = SQLFORM.grid(q,
     form = SQLFORM.grid(q, args=request.args[:start_idx],
-        fields=[db.games.game, db.games.edition, db.games.date_posted,
+        fields=[db.games.game, db.games.edition,
                 db.games.campaign_title,  db.games.meeting_location, db.games.meet_date, 
-				db.games.welcome_new, db.games.looking_for_players, db.games.open_spots,
-                db.games.description], csv = False,
+				 db.games.looking_for_players, db.games.open_spots,
+               ], csv = False,
         editable=False, deletable=False, details= False,
         links=links,
         paginate=10,
@@ -130,7 +130,6 @@ def view():
     if destroy:
         db(db.party.id == request.vars.person).delete()
         var = db(db.party.id == request.vars.person).select(db.party.accepted)
-        
         if var:
             p.update_record( open_spots = openNumSpotsInc(openspots)) #increment the counts
         redirect((URL('games', view, args = [request.args(0)])))

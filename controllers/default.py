@@ -49,14 +49,16 @@ def profile():
     p = db.profiling(db.profiling.email == emailz)#or redirect(URL('default', 'index'))
     form = SQLFORM(db.profiling, record=p, readonly=True)
     editButton = ''
+    if profile_id is None: # check to see accessed not from view
+        profile_id = auth.user_id
+    profile_base =(db.profiling.email == request.args(0))#gets the specific profile
+    if profile_base is None: # if new profile
+        redirect(URL('default', 'new'))
     if p.email == auth.user.email:
         editButton = A('Edit Profile', _class='btn', _href=URL('default', 'edit', args=[emailz]))
-  #  if profile_id is None: # check to see accessed not from view
- #       profile_id = auth.user_id
+    
         
-  #  profile_base =(db.profiling.email == request.args(0))#gets the specific profile
-#    if profile_base is None: # if new profile
- #       redirect(URL('default', 'new'))
+ 
    # form = SQLFORM(profile_base, fields=[db.profiling.first_name, db.profiling.last_name, db.profiling.email, db.profiling.bio],
         #                deletable = False, csv=False,)
    # form = SQLFORM(db.profiling, readonly= True)
