@@ -49,16 +49,14 @@ def profile():
     p = db.profiling(db.profiling.email == emailz)#or redirect(URL('default', 'index'))
     form = SQLFORM(db.profiling, record=p, readonly=True)
     editButton = ''
-    if profile_id is None: # check to see accessed not from view
-        profile_id = auth.user_id
-    profile_base =(db.profiling.email == request.args(0))#gets the specific profile
-    if profile_base is None: # if new profile
-        redirect(URL('default', 'new'))
-    if p.email == auth.user.email:
-        editButton = A('Edit Profile', _class='btn', _href=URL('default', 'edit', args=[emailz]))
-    
+    #if p.email == auth.user.email:
+    editButton = A('Edit Profile', _class='btn', _href=URL('default', 'edit', args=[emailz]))
+  #  if profile_id is None: # check to see accessed not from view
+ #       profile_id = auth.user_id
         
- 
+  #  profile_base =(db.profiling.email == request.args(0))#gets the specific profile
+#    if profile_base is None: # if new profile
+ #       redirect(URL('default', 'new'))
    # form = SQLFORM(profile_base, fields=[db.profiling.first_name, db.profiling.last_name, db.profiling.email, db.profiling.bio],
         #                deletable = False, csv=False,)
    # form = SQLFORM(db.profiling, readonly= True)
@@ -85,7 +83,11 @@ def new():
 def edit():
     """Edit a profile."""
     emailz = request.args(0)
+    v= db.profiling(request.args(0))
     p = db.profiling(db.profiling.email == emailz)#or redirect(URL('default', 'index'))
+    if request.args(0) != auth.user.email:
+        session.flash = T('Not authorized.')
+        redirect(URL('default', 'index'))
     form = SQLFORM(db.profiling, record=p)
     #form = SQLFORM.factory(Field('First_Name', default = p.first_name),
      #                      Field('Last_Name', default = p.last_name),
@@ -95,7 +97,7 @@ def edit():
     
     
     if form.process().accepted:
-        p.update_record(**dict(form.vars))
+       # p.update_record(**dict(form.vars))
         #db(p).update(first_name = form.vars.First_Name)
         #db(p).update(last_name = form.vars.Last_Name)
         #db(p).update(email = form.vars.Email)
