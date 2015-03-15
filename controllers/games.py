@@ -46,7 +46,7 @@ def index():
                 db.games.campaign_title,  db.games.meeting_location, db.games.meet_date, 
 				 db.games.looking_for_players, db.games.open_spots,
                ], csv = False,
-        editable=False, deletable=False, details= False,
+        editable=False, deletable=False, details= False, create = False,
         links=links,
         paginate=10,
         )
@@ -155,7 +155,7 @@ def view():
             redirect(URL('games', view, args = [request.args(0)]))
     form = SQLFORM(db.games, record = p, readonly=True) #basic information on the game
     form3 = SQLFORM.grid(hello, fields = [db.party.players, db.party.requesting_to_join, db.party.accepted], user_signature=False, 
-						 sortable= False, searchable= False, links = links, csv= False, editable=False, deletable=False, details= False,) #Players in the party
+						 sortable= False, searchable= False, links = links, csv= False, editable=False, deletable=False, create = False, details= False,) #Players in the party
 
 
     return dict(form = form, form2=form2, form_add = form_add, form3= form3, edit_button = edit_button, button=button, title = p.campaign_title)

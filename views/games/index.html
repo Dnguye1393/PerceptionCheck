@@ -1,7 +1,45 @@
-{{left_sidebar_enabled,right_sidebar_enabled=False,('message' in globals())}}
+<!--{{left_sidebar_enabled,right_sidebar_enabled=False,('message' in globals())}}-->
 {{extend 'layout.html'}}
+  
 
-<center><h1>Welcome to Games!</h1></center>
+
+<head>
+<style>
+v.background {
+    background: url("{{=URL('static','images/shadowrunscene')}}");
+    border: 1px solid black; <!-- image from http://colorzblind.deviantart.com/-->
+    position: fixed
+    
+    animation-name: test;
+    animation-duration: 8s;
+}
+
+div.transbox {
+    margin: 30px;
+    opacity: 1.0
+    filter: alpha(opacity=60); /* For IE8 and earlier */
+}
+
+div.transbox p {
+    margin: 5%;
+    font-weight: bold;
+    color: #ffffff;
+    font-size: 25px;
+    font-family: "Arial", Arial, sans-serif;
+}
+
+
+</style>
+</head>
+<body>
+  <div class="background">
+    <div class="transbox">
+     <p>Search for a Game or Create your own!</p>
+    </div>
+  </div>
+
+
+
 
 {{=form}}
 
