@@ -22,6 +22,8 @@ div.transbox p {
     color: #000000;
     font-size: 25px;
     font-family: "Arial", Arial, sans-serif;
+    color: black;
+
 }
 </style>
 </head>
@@ -34,7 +36,7 @@ div.transbox p {
 </div>
 
 {{=A('Find A Games', _class='btn', _href=URL('games', 'index',))}}
-{{=A('Inbox', _class='btn', _href=URL('messaging', 'inbox',))}}
+{{=A('Inbox', _class='btn', _href=URL('messaging', 'inbox',args=[auth.user.email]))}}
 {{=A('Message', _class='btn', _href=URL('messaging', 'create',))}}
 
 {{=A('Profile', _class='btn', _href=URL('default', 'profile', args = [editing]))}}

@@ -126,12 +126,15 @@ def view():
     form_add = ''
     openNumSpotsInc = lambda b: b+1
     openNumSpotsDec = lambda b: b-1
-
+    if p.open_spots > 0:
+            p.update_record(looking_for_players = True)
     if destroy:
         db(db.party.id == request.vars.person).delete()
         var = db(db.party.id == request.vars.person).select(db.party.accepted)
         if var:
             p.update_record( open_spots = openNumSpotsInc(openspots)) #increment the counts
+        if p.open_spots > 0:
+            p.update_record(looking_for_players = True)
         redirect((URL('games', view, args = [request.args(0)])))
 
     if p.user_id != auth.user_id: #this is for the user, who is not the GM, to request to join
@@ -151,6 +154,8 @@ def view():
             changing = db(db.party.id==row_id).select().first()
             p.update_record(open_spots = openNumSpotsDec(openspots)) #decrease number of Open spots
             changing.update_record(requesting_to_join = False, accepted = True)
+            if p.open_spots == 0:
+                p.update_record(looking_for_players = False) #check to see if there is any more open spots left
 			#minus one to open spots
             redirect(URL('games', view, args = [request.args(0)]))
     form = SQLFORM(db.games, record = p, readonly=True) #basic information on the game

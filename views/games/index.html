@@ -5,13 +5,10 @@
 
 <head>
 <style>
-v.background {
+div.background {
     background: url("{{=URL('static','images/shadowrunscene')}}");
     border: 1px solid black; <!-- image from http://colorzblind.deviantart.com/-->
     position: fixed
-    
-    animation-name: test;
-    animation-duration: 8s;
 }
 
 div.transbox {
@@ -26,6 +23,10 @@ div.transbox p {
     color: #ffffff;
     font-size: 25px;
     font-family: "Arial", Arial, sans-serif;
+    color: black;
+   -webkit-text-fill-color: white; /* Will override color (regardless of order) */
+   -webkit-text-stroke-width: 1px;
+   -webkit-text-stroke-color: black;
 }
 
 
