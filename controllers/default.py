@@ -86,6 +86,10 @@ def edit():
 #Forum and Edit both are part of the 'same' functions of Creating a Forum for the website
 
 def forum():
+    #The forums allow users to discuss topics over a public area
+    #this does not overlap with messages because it provides an open, recorded discussion for everyone to see
+    #can also act as a looking for group/dm for the users as well
+    """Forum base index"""
     editing = request.vars.editing
     def generate_goto_button(row):
         b = A('View', _class='btn', _href=URL('default', 'view', args=[row.id]))
@@ -114,10 +118,11 @@ def forum():
 
 def view():
     """View the Forums"""
+    #Tied specifcally to Forums
     row_id = request.args(0)#Grab Everything
     rightOne = db.forums.id == request.args(0)
     title = db.forums(row_id).title
-    body = SQLFORM.grid(rightOne, fields=[db.forums.title, db.forums.specific_campaign, db.forums.topic, db.forums.poster, db.forums.date_posted, ],
+    form = SQLFORM.grid(rightOne, fields=[db.forums.title, db.forums.specific_campaign, db.forums.topic, db.forums.poster, db.forums.date_posted, ],
                         sortable= False, searchable= False, csv= False, editable=False, deletable=False, create = False, details= False, user_signature= False )
     check = db.forums(row_id).body #get Description
     posting = request.vars.posting 
@@ -132,13 +137,13 @@ def view():
             redirect(URL('default', 'view', args = [row_id]))
 
     else:
-        form = SQLFORM.grid(db.forumThread.forumThread_id == thread_id, user_signature = False,
+        form2 = SQLFORM.grid(db.forumThread.forumThread_id == thread_id, user_signature = False,
                 fields=[db.forumThread.date_posted,db.forumThread.body, db.forumThread.poster],
                 editable=False, deletable=False, details = False, create = False, searchable = False, csv = False, 
                 paginate=10, orderby = db.forumThread.date_posted)
 
     # p.name would contain the name of the poster.
-    return dict(form=form, body=body, check=check, button=button)
+    return dict(form=form, form2=form2, check=check, button=button)
 
 
 
