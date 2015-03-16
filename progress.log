@@ -1768,3 +1768,8 @@
 [2015-03-16 05:10:38] EDIT perceptioncheck/views/default/forum.html: 0
 [2015-03-16 05:29:31] CREATE pmessage.py: 0
 [2015-03-16 05:30:02] EDIT perceptioncheck/controllers/pmessage.py: 66
+[2015-03-16 05:31:41] DELETE perceptioncheck/controllers/pmessage.py: -67
+[2015-03-16 05:35:18] EDIT perceptioncheck/controllers/messaging.py: 0
+[2015-03-16 05:35:42] EDIT perceptioncheck/views/messaging/create.html: 1
+[2015-03-16 05:35:50] EDIT perceptioncheck/views/messaging/inbox.html: 1
+[2015-03-16 05:35:55] EDIT perceptioncheck/views/messaging/read.html: 1

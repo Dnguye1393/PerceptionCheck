@@ -3,6 +3,7 @@
 # create and inbox and read
 #messaging
 #allow people to contact each other
+#based off of: https://github.com/blackshirt/simple-private-messaging-system
 def index():
     return dict()
     
@@ -26,7 +27,7 @@ def create():
 
 
 def truncate():
-    return db.mssging.truncate()
+    return db.mssging.truncate() 
         
 @auth.requires_login()    
 def read():
