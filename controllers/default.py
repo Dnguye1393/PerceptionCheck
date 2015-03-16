@@ -113,14 +113,17 @@ def forum():
 def view():
     """View the Forums"""
     row_id = request.args(0)#Grab Everything
-    title = db.forums[row_id].title
-    body = db.forums[row_id].body
+    rightOne = db.forums.id == request.args(0)
+    title = db.forums(row_id).title
+    body = SQLFORM.grid(rightOne, fields=[db.forums.title, db.forums.specific_campaign, db.forums.topic, db.forums.poster, db.forums.date_posted, ],
+                        sortable= False, searchable= False, csv= False, editable=False, deletable=False, create = False, details= False, user_signature= False )
+    check = db.forums(row_id).body #get Description
     posting = request.vars.posting 
     button = A('Post', _class='btn', _href=URL('default', 'view', args = [row_id], vars=dict(posting= True)))  
     thread = db(db.forums.title == title).select().first()
     thread_id = thread.id if thread is not None else None
     if posting:
-        button = ""
+        button = ''
         form = SQLFORM.factory(db.forumThread)
         if form.process().accepted:
             db.forumThread.insert(body=form.vars.body, forumThread_id = forumThread_id)
@@ -133,7 +136,7 @@ def view():
                 paginate=10, orderby = db.forumThread.date_posted)
 
     # p.name would contain the name of the poster.
-    return dict(form=form, title=title, body=body, button=button)
+    return dict(form=form, body=body, check=check, button=button)
 
 
 

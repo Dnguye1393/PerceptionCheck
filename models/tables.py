@@ -182,6 +182,7 @@ db.forums.date_posted.default = request.now
 #Forum Threads Extension
 db.define_table('forumThread',
                 Field('forumThread_id', readable = False, writable = False),
+                Field('date_posted', 'datetime', default = request.now),
                 Field('poster'),
                 Field('body', 'text'),
     )
