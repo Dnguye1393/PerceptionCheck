@@ -1764,3 +1764,5 @@
 [2015-03-16 05:07:21] EDIT perceptioncheck/controllers/default.py: 1
 [2015-03-16 05:08:14] EDIT perceptioncheck/views/default/view.html: 0
 [2015-03-16 05:08:17] EDIT perceptioncheck/controllers/default.py: 0
+[2015-03-16 05:10:26] EDIT perceptioncheck/views/default/view.html: 0
+[2015-03-16 05:10:38] EDIT perceptioncheck/views/default/forum.html: 0
