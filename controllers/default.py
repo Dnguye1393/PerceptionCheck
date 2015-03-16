@@ -31,7 +31,7 @@ def index():
 
 	
 	
-	
+#Profile Edit and new are All part of the Profile Function. 
 @auth.requires_login()
 def profile():
 	#Profile will ahve their name and Email adress
@@ -51,20 +51,7 @@ def profile():
     editButton = ''
     #if p.email == auth.user.email:
     editButton = A('Edit Profile', _class='btn', _href=URL('default', 'edit', args=[emailz]))
-  #  if profile_id is None: # check to see accessed not from view
- #       profile_id = auth.user_id
-        
-  #  profile_base =(db.profiling.email == request.args(0))#gets the specific profile
-#    if profile_base is None: # if new profile
- #       redirect(URL('default', 'new'))
-   # form = SQLFORM(profile_base, fields=[db.profiling.first_name, db.profiling.last_name, db.profiling.email, db.profiling.bio],
-        #                deletable = False, csv=False,)
-   # form = SQLFORM(db.profiling, readonly= True)
- #   if editing:
-  #      redirect(URL('default', 'edit', args=[profile_id]))
 
-    #if normal view
-     #view it
 
     return dict(form=form, editing = emailz, editButton = editButton)
 	
@@ -89,23 +76,69 @@ def edit():
         session.flash = T('Not authorized.')
         redirect(URL('default', 'index'))
     form = SQLFORM(db.profiling, record=p)
-    #form = SQLFORM.factory(Field('First_Name', default = p.first_name),
-     #                      Field('Last_Name', default = p.last_name),
-      #                     Field('Email', default = p.email),
-       #                    Field('bio', default= p.bio,),
-        #                   table_name = 'Profile')
-    
-    
     if form.process().accepted:
-       # p.update_record(**dict(form.vars))
-        #db(p).update(first_name = form.vars.First_Name)
-        #db(p).update(last_name = form.vars.Last_Name)
-        #db(p).update(email = form.vars.Email)
-        #db(p).update(bio = form.vars.bio)
+
         session.flash = T('Updated')
         redirect(URL('default', 'profile', args=(auth.user.email)))
     # p.name would contain the name of the poster.
     return dict(form=form, editing=emailz)
+
+#Forum and Edit both are part of the 'same' functions of Creating a Forum for the website
+
+def forum():
+    editing = request.vars.editing
+    def generate_goto_button(row):
+        b = A('View', _class='btn', _href=URL('default', 'view', args=[row.id]))
+        return b
+    
+    if editing:
+        button = ''
+        form = SQLFORM.factory(db.forums)
+        if form.process().accepted:
+            db.forums.insert(body=form.vars.body, title=form.vars.title, topic=form.vars.topic)
+            redirect(URL('default', 'forum'))
+
+    else:
+        links=[dict(header='', body = generate_goto_button)]
+
+        form = SQLFORM.grid(db.forums, user_signature = False,
+                fields=[db.forums.title, db.forums.topic, db.forums.date_posted, db.forums.poster],
+                editable=False, deletable=False, details = False, create = False, searchable = False, csv = False, 
+                paginate=10, orderby =~ db.forums.date_posted,  links=links)
+
+    return dict(form=form)
+
+
+
+def view():
+    """View the Forums"""
+    row_id = request.args(0)#Grab Everything
+    title = db.forums[row_id].title
+    body = db.forums[row_id].body
+    posting = request.vars.posting 
+    button = A('Post', _class='btn', _href=URL('default', 'view', args = [row_id], vars=dict(posting= True)))  
+    thread = db(db.forums.title == title).select().first()
+    thread_id = thread.id if thread is not None else None
+    if posting:
+        button = ""
+        form = SQLFORM.factory(db.forumThread)
+        if form.process().accepted:
+            db.forumThread.insert(body=form.vars.body, forumThread_id = forumThread_id)
+            redirect(URL('default', 'view', args = [row_id]))
+
+    else:
+        form = SQLFORM.grid(db.forumThread.forumThread_id == thread_id, user_signature = False,
+                fields=[db.forumThread.date_posted,db.forumThread.body, db.forumThread.poster],
+                editable=False, deletable=False, details = False, create = False, searchable = False, csv = False, 
+                paginate=10, orderby = db.forumThread.date_posted)
+
+    # p.name would contain the name of the poster.
+    return dict(form=form, title=title, body=body, button=button)
+
+
+
+
+
 def user():
     """ge_id = str(page.id)page_id = str(page.id)
             # We are just displaying the page

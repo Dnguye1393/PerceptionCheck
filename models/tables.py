@@ -28,7 +28,7 @@ EDITION = [ '1E' , '1.5E', '2E', '2.5E', '3E', '3.5E', '4E', '4.5E', '5E', '5.5E
 HOUSERULES = ['Yes', 'No', 'Minor Changes']
 GAMETYPE = ['Shadowrun', 'Dungeon and Dragons', 'Savage Worlds', 'Pathfinder', 'Other']
 RE_LINKS = re.compile('(<<)(.*?)(>>)')
-
+TOPIC = ['Games', 'Looking for Group', 'Looking for Players', 'Questions Rules', 'Story Time', 'Other']
 
 #
 # Profiles for people to view.
@@ -107,7 +107,7 @@ db.define_table('revision',
 	Field('campaign_title'),
     Field('page_id', db.pagetable),
     Field('author'),
-    Field('date_posted', 'datetime', default= datetime.utcnow()),
+    Field('date_posted', 'datetime', default = request.now),
     Field('body', 'text'), # This is the main content of a revision.
     #Field('comments', 'text'),
     )
@@ -157,3 +157,33 @@ db.define_table('mssging',
     )
 
 db.mssging.reciever_email.requires=IS_IN_DB(db, db.auth_user.id,'%(email)s') #list of email in the db
+db.mssging.timesent.default = datetime.utcnow()
+
+
+
+#List of Threads in a Forum For discussion or finding a Dm/Group
+db.define_table('forums',
+                Field('poster_email', default = get_email()),
+                Field('title'),
+                Field('topic'),
+                Field('body', 'text'),
+                Field('date_posted', 'datetime'),
+                Field('poster'),
+                Field('specific_campaign') #add ajax here???
+    )
+db.forums.specific_campaign.requires=IS_IN_DB(db, db.games.campaign_title,'%(campaign_title)s')
+db.forums.topic.requires = IS_IN_SET(TOPIC)
+db.forums.topic.required = True
+db.forums.poster.default = get_first_name()
+db.forums.poster.writable = False
+db.forums.date_posted.writable = False
+db.forums.date_posted.default = request.now
+
+#Forum Threads Extension
+db.define_table('forumThread',
+                Field('forumThread_id', readable = False, writable = False),
+                Field('poster'),
+                Field('body', 'text'),
+    )
+db.forumThread.poster.default = get_email()
+db.forumThread.poster.writable = False
