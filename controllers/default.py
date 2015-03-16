@@ -97,6 +97,8 @@ def forum():
         if form.process().accepted:
             db.forums.insert(body=form.vars.body, title=form.vars.title, topic=form.vars.topic)
             redirect(URL('default', 'forum'))
+        elif form.errors:
+            response.flash='error'
 
     else:
         links=[dict(header='', body = generate_goto_button)]
@@ -126,7 +128,7 @@ def view():
         button = ''
         form = SQLFORM.factory(db.forumThread)
         if form.process().accepted:
-            db.forumThread.insert(body=form.vars.body, forumThread_id = forumThread_id)
+            db.forumThread.insert(body=form.vars.body, forumThread_id = thread_id)
             redirect(URL('default', 'view', args = [row_id]))
 
     else:
