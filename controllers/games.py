@@ -83,6 +83,7 @@ def view():
     # p = db(db.games.id == request.args(0)).select().first()
     p = db.games(request.args(0)) or redirect(URL('games', 'index')) #keep track of info from pervious page
     b = db.party(request.args(0)) #keep track of info on this page
+    
     openspots = p.open_spots #number of spots open
     destroy = request.vars.delete #delete function
     hello = db.party.campaign_title == p.campaign_title #makeing sure ot match the right campaign
@@ -103,9 +104,10 @@ def view():
             accept = A('Accept Request', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(person = row.id, join= 'N', accepted ='y' )  ))
         return accept
     def generate_profile_button(row):
+        email = db.party(row.id).email
         profil = '' #if a Gm wants to check a person's profile. I don't want random people to check other people's profiles
         if auth.user_id == p.user_id:
-            profil = A('Check Profile', _class= 'btn',  _href=URL('default', 'profile', args=(b.email) )) #vars = dict(peremail =row.email)
+            profil = A('Check Profile', _class= 'btn',  _href=URL('default', 'profile', args=(email) )) #vars = dict(peremail =row.email)
         return profil
     def generate_del_button(row):
         # If the item is ours we can delete it
