@@ -3,7 +3,8 @@
 
 @auth.requires_login()
 def index():
- # Get All data. 
+#This is the games Index page
+#It shows all the Games that are actively looking for players
 
     show_all = request.args(0) =='all'
     #q = db.games
@@ -39,14 +40,7 @@ def index():
         button = A('See Open Games', _class='btn', _href=URL('games', 'index'))
     else:
         button = A('See All Games', _class='btn', _href=URL('games', 'index', args=['all']))
-
-  #  if len(request.args) == 0:
-        # We are in the main index.
-   #     links.append(dict(header='Post', body = shorten_post))
-      #  db.games.description.readable = False
     start_idx = 1 if show_all else 0
-   # form = SQLFORM.grid(q, args=request.args[:start_idx],
-    #form = SQLFORM.grid(q,
     form = SQLFORM.grid(q, args=request.args[:start_idx],
         fields=[db.games.game, db.games.edition,
                 db.games.campaign_title,  db.games.meeting_location, db.games.meet_date, 
@@ -59,12 +53,6 @@ def index():
     test = db().select(db.games.campaign_title).first()
     db.party.insert(campaign_title=test)
     return dict(form=form, show_all=show_all, button=button)
-    """
-    # This index appears when you go to /games/index . 
-    # """
-    # # We want to generate an index of the posts. 
-    # posts = db().select(db.games.ALL)
-    # return dict(posts=posts)
 
 @auth.requires_login()
 def new():
@@ -185,7 +173,6 @@ def view():
 def edit():
     """Edit a post."""
     show_all = request.args(0) =='all'
-    # p = db(db.games.id == request.args(0)).select().first()
     p = db.games(request.args(0)) or redirect(URL('games', 'index'))
 
     if p.user_id != auth.user_id:
@@ -200,6 +187,7 @@ def edit():
 
 @auth.requires_login()
 def delete():
+    #delete for the games index
     """Deletes a post."""
     p = db.games(request.args(0)) or redirect(URL('games', 'index'))
     if p.user_id != auth.user_id:
@@ -210,6 +198,8 @@ def delete():
 
 @auth.requires_login()
 def delete2():
+    #delete for the Gamse View party
+    #might not be necssary though
     """Deletes a post."""
     p = db.games(request.args(0)) or redirect(URL('games', 'index'))
     if p.user_id != auth.user_id:

@@ -4,7 +4,8 @@ import re
 import unittest
 crud = Crud(db)
 
-def get_first_name():
+#Functions for Tables
+def get_first_name(): #
 	name = "noName"
 	if auth.user:
 		name = auth.user.first_name
@@ -22,30 +23,29 @@ def get_email():
         emailz = auth.user.email
     return emailz
 
-
-EDITION = [ '1E' , '1.5E', '2E', '2.5E', '3E', '3.5E', '4E', '4.5E', '5E', '5.5E', 
-		   '6E', 'Home Brew']
+#List of sets for tables
+EDITION = [ '1E' , '1.5E', '2E', '2.5E', '3E', '3.5E', '4E', '4.5E', '5E', '5.5E', '6E', 'Home Brew']
 HOUSERULES = ['Yes', 'No', 'Minor Changes']
 GAMETYPE = ['Shadowrun', 'Dungeon and Dragons', 'Savage Worlds', 'Pathfinder', 'World of Darkness', 'Traveller', 'Call of Cuthulu', 'GURPS',  'Other']
-RE_LINKS = re.compile('(<<)(.*?)(>>)')
 TOPIC = ['Games', 'Looking for Group', 'Looking for Players', 'Questions Rules', 'Story Time', 'Other']
 
-#
-# Profiles for people to view.
-#
-db.define_table('profiling',
+#for Wikia
+RE_LINKS = re.compile('(<<)(.*?)(>>)')
+
+# Profiles for Gm's to view. No one else has access to other people's Views unless you are a Gm and people request to join yoru game
+db.define_table('profiling', 
                 Field('user_id', db.auth_user, writable= False, readable = False),
                 Field('first_name', default = get_first_name() ),
                 Field('last_name', default = get_last_name() ),
 				Field('email', default = get_email()), #used as the main identifier as well as to show for messaging
-                Field('Preferences', requires= IS_IN_SET(GAMETYPE, multiple = True)),
+                Field('Preferences', requires= IS_IN_SET(GAMETYPE, multiple = True)), #list of games and picking which one you want to play
                 Field('bio', 'text', default = 'Talk about yourself')
                )
 db.profiling.id.readable = False;
 db.profiling.user_id.readable = False;
 
 
-
+#Party is table to keep track of all the people who request to join your game and who is already in your game
 db.define_table('party', #to keep track of all the campaigns
 				  Field('campaign_title' ),
 				  Field('players'),
@@ -58,9 +58,9 @@ db.define_table('party', #to keep track of all the campaigns
 db.party.id.readable= False
 db.party.user_id.readable= False
 db.party.user_id.writable = False
-#db.party.email.readable=False
 db.party.campaign_title.readable= False
 
+#Games is the List of games on the website Anyone can create one
 db.define_table('games', #main data of website Controls all the games
 				Field('campaign_title'),
 				Field('user_id', db.auth_user),
@@ -86,19 +86,23 @@ db.games.user_id.default = auth.user_id
 db.games.user_id.writable = db.games.user_id.readable = False
 db.games.id.readable= False
 db.games.game_master.default = get_first_name()
-db.games.edition.requires = IS_IN_SET(EDITION)
-db.games.house_rules.requires = IS_IN_SET(HOUSERULES)
-db.games.game.requires = IS_IN_SET(GAMETYPE)
-#db.games.players.writable = False #okay for now
+db.games.edition.requires = IS_IN_SET(EDITION, zero = None)
+db.games.house_rules.requires = IS_IN_SET(HOUSERULES, zero = None)
+db.games.game.requires = IS_IN_SET(GAMETYPE, zero=None)
 db.games.looking_for_players.default = False
 db.games.house_rules.default = 'No'
 db.games.edition.default = '5E'
 db.games.zipcode.requires = IS_MATCH('\d{5}', error_message='Put in format #####')
+db.games.campaign_title.required = True
+db.games.open_spots.required = True
+db.games.maximum_amount_of_players.required = True
 
 
 
 
-# Wikia Portion taken from Homework assignemnts and Adapted for use.
+
+# Wikia Portion taken from Homework assignemnts and Adapted for use. 
+
 
 db.define_table('pagetable', # Name 'page' is reserved unfortunately.
     Field('name', 'text'),
@@ -145,8 +149,9 @@ db.revision.body.represent = represent_content
 
 
 
-#messaging system
-
+#messaging system 
+#added so that Players and Gm's could talk Privately
+#based off of: https://github.com/blackshirt/simple-private-messaging-system
 db.define_table('mssging',
     Field('sender_id', db.auth_user, default=auth.user_id, readable=False, writable=False),
     Field('reciever_email', db.auth_user, readable=False),
@@ -163,7 +168,8 @@ db.mssging.timesent.default = datetime.utcnow()
 db.mssging.id.readable = False
 
 
-#List of Threads in a Forum For discussion or finding a Dm/Group
+#List of Threads in a Forum For discussion or finding a Dm/Group 
+#Will allow users to discuss Openly
 db.define_table('forums',
                 Field('poster_email', default = get_email()),
                 Field('title'),
@@ -182,7 +188,9 @@ db.forums.specific_campaign.required= False
 db.forums.date_posted.writable = False
 db.forums.date_posted.default = request.now
 db.forums.id.readable = False
+
 #Forum Threads Extension
+#this is the actual Thread. The posts on here will be tied t oteh Forums, to kee everying in line
 db.define_table('forumThread',
                 Field('forumThread_id', readable = False, writable = False),
                 Field('date_posted', 'datetime', default = request.now),

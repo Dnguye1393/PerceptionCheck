@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime
 
-# Main Function
+# Main Function for wikia
+#Most of the code is taken straight from the homeworks
 def index():
     # Title of page is reached at request.args(0)
     title = request.args(0) or 'main page'
@@ -11,18 +12,14 @@ def index():
 
     form = None
     content = None
-
-    # Taken from Luca's code
     newpost = request.vars.newpost == 'true'
     editing = request.vars.edit == 'true'
     history = request.vars.history == 'true'
     content = ''
 
-    # Required for assignment
     edit_button = False
 
-    # Let's uppernice the title.  The last 'title()' below
-    # is actually a Python function, if you are wondering.
+
     display_title = title.title()
 
     # Selecting the most recent revision
@@ -51,24 +48,11 @@ def index():
         if form.process().accepted:
             if page is None:
 
-                ############################################################################
-                #
-                # Originally, content being set equal to rev.body was not returning a string
-                # resulting in an error when trying to compile the app. This was due to not
-                # properly inserting information into the revision, as originally the code was
-                # 'db.pagetable.insert(name=title)'. By assigning page_id to the code just
-                # mentioned, you properly establish the content to the ID of the page being
-                # worked on and save it for later use.
-                #
-                ############################################################################
-
                 page_id=db.pagetable.insert(name=title)
                 db.revision.insert(body=form.vars.body, page_id=page_id)
             redirect(URL('wikia', 'index', args=[title]))
         content = form
 
-    # Process for developing a revision, very similar to developing a new wiki page
-    # Help was received from Rakshit Agrawal, the TA for CMPS 183
     if editing:
         rev = db(db.revision.page_id == page.id).select(orderby=~db.revision.date_posted).first()
         form = SQLFORM.factory(Field('body', 'text',
@@ -133,9 +117,6 @@ def test():
     form = None
     content = None
 
-    # Let's uppernice the title.  The last 'title()' below
-    # is actually a Python function, if you are wondering.
-    display_title = title.title()
 
     # Gets the body s of the page.
     r = db.testpage(1)
@@ -146,8 +127,7 @@ def test():
     logger.info("This is a request for page %r, with editing %r" %
                  (title, editing))
     if editing:
-        # We are editing.  Gets the body s of the page.
-        # Creates a form to edit the content s, with s as wikia.
+        # We are editing. .
         form = SQLFORM.factory(Field('body', 'text',
                                      label='Content',
                                      wikia=s
@@ -163,8 +143,7 @@ def test():
             else:
                 # We update it.
                 r.update_record(body=form.vars.body)
-            # We redirect here, so we get this page with GET rather than POST,
-            # and we go out of edit mode.
+
             redirect(URL('wikia', 'test'))
         content = form
     else:

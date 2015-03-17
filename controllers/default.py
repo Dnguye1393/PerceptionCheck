@@ -58,6 +58,7 @@ def profile():
 	
 @auth.requires_login()
 def new():
+    #creating a new profile
     """Add a profile."""
     form = SQLFORM(db.profiling)
     if form.process().accepted:
@@ -68,10 +69,11 @@ def new():
 	
 @auth.requires_login()
 def edit():
+    #editing a profile using form
     """Edit a profile."""
     emailz = request.args(0)
     v= db.profiling(request.args(0))
-    p = db.profiling(db.profiling.email == emailz)#or redirect(URL('default', 'index'))
+    p = db.profiling(db.profiling.email == emailz)
     if request.args(0) != auth.user.email:
         session.flash = T('Not authorized.')
         redirect(URL('default', 'index'))
@@ -82,6 +84,7 @@ def edit():
         redirect(URL('default', 'profile', args=(auth.user.email)))
     # p.name would contain the name of the poster.
     return dict(form=form, editing=emailz)
+
 
 #Forum and Edit both are part of the 'same' functions of Creating a Forum for the website
 
@@ -99,7 +102,7 @@ def forum():
         button = ''
         form = SQLFORM.factory(db.forums) #forums Form llowing user to edit
         if form.process().accepted:
-            db.forums.insert(body=form.vars.body, title=form.vars.title, topic=form.vars.topic)
+            db.forums.insert(body=form.vars.body, title=form.vars.title, topic=form.vars.topic)#to go to the threads or the meat of each forum topic
             redirect(URL('default', 'forum'))
         elif form.errors:
             response.flash='error'
@@ -119,6 +122,9 @@ def forum():
 def view():
     """View the Forums"""
     #Tied specifcally to Forums
+    #this is the threads tied to each of the forum topic
+    #first form is the row id For the Topic
+    #Second form is the actual thread
     row_id = request.args(0)#Grab Everything
     form2 = ''
     rightOne = db.forums.id == request.args(0)
