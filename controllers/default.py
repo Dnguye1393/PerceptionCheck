@@ -87,7 +87,7 @@ def edit():
 
 
 #Forum and Edit both are part of the 'same' functions of Creating a Forum for the website
-
+@auth.requires_login()
 def forum():
     #The forums allow users to discuss topics over a public area
     #this does not overlap with messages because it provides an open, recorded discussion for everyone to see
@@ -118,7 +118,7 @@ def forum():
     return dict(form=form)
 
 
-
+@auth.requires_login()
 def view():
     """View the Forums"""
     #Tied specifcally to Forums

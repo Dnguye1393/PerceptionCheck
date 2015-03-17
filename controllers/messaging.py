@@ -4,6 +4,7 @@
 #messaging
 #allow people to contact each other
 #based off of: https://github.com/blackshirt/simple-private-messaging-system
+@auth.requires_login()
 def index():
     return dict()
     
@@ -19,13 +20,13 @@ def inbox():
 def create():
     form=SQLFORM(db.mssging) #messaging system using SQLFORM
     if form.accepts(request.vars, session):
-        session.flash='Record inserted'
+        session.flash='Message Sent'
         redirect(URL(r=request,f='inbox'))
     elif form.errors:
         response.flash='error'
     return dict(form=form)
 
-
+@auth.requires_login()
 def truncate():
     return db.mssging.truncate() 
         

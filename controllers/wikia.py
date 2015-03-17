@@ -3,6 +3,7 @@ from datetime import datetime
 
 # Main Function for wikia
 #Most of the code is taken straight from the homeworks
+@auth.requires_login()
 def index():
     # Title of page is reached at request.args(0)
     title = request.args(0) or 'main page'

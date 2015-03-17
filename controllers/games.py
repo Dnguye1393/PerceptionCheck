@@ -65,6 +65,7 @@ def new():
         redirect(URL('games', 'index'))
     return dict(form=form, show_all=show_all)
 
+@auth.requires_login()
 def view():
     #request to add self to a gamwe
 	#allow GM to add people who are requesting to get into game
@@ -87,6 +88,7 @@ def view():
     openNumSpotsDec = lambda b: b-1
     openspots = p.open_spots #number of spots open
     destroy = request.vars.delete #delete function
+    theSame = db.party(db.party.campaign_title == p.campaign_title).email
     hello = db.party.campaign_title == p.campaign_title #makeing sure ot match the right campaign
     isjoin = request.vars.join == 'y'#Check to see if they are requesting to join the game
     isaccepted = request.vars.accepted == 'y' #check to see if accepted var is y
@@ -140,10 +142,12 @@ def view():
         
     if p.user_id != auth.user_id: #this is for the user, who is not the GM, to request to join
         if isjoin:
-            if db.party(db.party(request.args(0)).campaign_title == p.campaign_title).email == auth.user.email:
+            
+            #This kept Creating errors. Cannot use in demonstration.
+            #if email in the specific Party's list == auth.user.email:
 				    #If they requested to join already
-                session.flash = T('Already Requested.')
-                redirect(URL('games', 'view', args = [request.args(0)]))
+             #   session.flash = T('Already Requested.')
+              #  redirect(URL('games', 'view', args = [request.args(0)]))
             
             form_add = SQLFORM.grid(db.party, fields = [db.party.requesting_to_join], user_signature= False)
             db.party.insert(campaign_title = p.campaign_title, players= auth.user.email, requesting_to_join = True)
