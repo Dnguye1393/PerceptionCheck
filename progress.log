@@ -1970,3 +1970,7 @@
 [2015-03-17 08:47:57] EDIT perceptioncheck/controllers/games.py: 0
 [2015-03-17 08:48:25] EDIT perceptioncheck/controllers/games.py: 0
 [2015-03-17 08:49:16] EDIT perceptioncheck/controllers/games.py: 1
+[2015-03-17 10:22:10] EDIT perceptioncheck/controllers/default.py: 0
+[2015-03-17 10:22:18] EDIT perceptioncheck/controllers/games.py: 0
+[2015-03-17 10:22:25] EDIT perceptioncheck/views/messaging/inbox.html: 2
+[2015-03-17 10:22:35] EDIT perceptioncheck/views/messaging/read.html: 0

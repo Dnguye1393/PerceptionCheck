@@ -91,7 +91,7 @@ def view():
     openNumSpotsDec = lambda b: b-1
     openspots = p.open_spots #number of spots open
     destroy = request.vars.delete #delete function
-    theSame = db.party(db.party.campaign_title == p.campaign_title).email
+ #   theSame = db.party(db.party.campaign_title == p.campaign_title).email
     hello = db.party.campaign_title == p.campaign_title #makeing sure ot match the right campaign
     isjoin = request.vars.join == 'y'#Check to see if they are requesting to join the game
     isaccepted = request.vars.accepted == 'y' #check to see if accepted var is y

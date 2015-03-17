@@ -15,6 +15,7 @@ def index():
         title = request.args(0) or 'Main_Page'
         display_title = title.title().replace('_', ' ')
         editing = auth.user.email
+
         return dict(display_title=display_title, editing=editing)
 
 	
@@ -39,7 +40,6 @@ def profile():
     editButton = ''
     #if p.email == auth.user.email:
     editButton = A('Edit Profile', _class='btn', _href=URL('default', 'edit', args=[emailz]))
-
 
     return dict(form=form, editing = emailz, editButton = editButton)
 	
