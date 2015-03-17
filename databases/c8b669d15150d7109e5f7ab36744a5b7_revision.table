@@ -102,7 +102,7 @@ I00
 sg20
 S'string'
 p39
-ssS'date_posted'
+ssS'id'
 p40
 (dp41
 g4
@@ -110,14 +110,14 @@ I512
 sg5
 I00
 sg6
-I5
+I1
 sg7
-S'TIMESTAMP'
+S'INTEGER PRIMARY KEY AUTOINCREMENT'
 p42
 sg9
 I00
 sg10
-S'datetime'
+S'id'
 p43
 ssS'rcomment'
 p44
@@ -208,7 +208,7 @@ I00
 sg10
 S'reference pagetable'
 p67
-ssS'id'
+ssS'date_posted'
 p68
 (dp69
 g4
@@ -216,13 +216,13 @@ I512
 sg5
 I00
 sg6
-I1
+I5
 sg7
-S'INTEGER PRIMARY KEY AUTOINCREMENT'
+S'TIMESTAMP'
 p70
 sg9
 I00
 sg10
-S'id'
+S'datetime'
 p71
 ss.

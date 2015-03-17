@@ -26,7 +26,7 @@ def get_email():
 EDITION = [ '1E' , '1.5E', '2E', '2.5E', '3E', '3.5E', '4E', '4.5E', '5E', '5.5E', 
 		   '6E', 'Home Brew']
 HOUSERULES = ['Yes', 'No', 'Minor Changes']
-GAMETYPE = ['Shadowrun', 'Dungeon and Dragons', 'Savage Worlds', 'Pathfinder', 'Other']
+GAMETYPE = ['Shadowrun', 'Dungeon and Dragons', 'Savage Worlds', 'Pathfinder', 'World of Darkness', 'Traveller', 'Call of Cuthulu', 'GURPS',  'Other']
 RE_LINKS = re.compile('(<<)(.*?)(>>)')
 TOPIC = ['Games', 'Looking for Group', 'Looking for Players', 'Questions Rules', 'Story Time', 'Other']
 
@@ -38,6 +38,7 @@ db.define_table('profiling',
                 Field('first_name', default = get_first_name() ),
                 Field('last_name', default = get_last_name() ),
 				Field('email', default = get_email()), #used as the main identifier as well as to show for messaging
+                Field('Preferences', requires= IS_IN_SET(GAMETYPE, multiple = True)),
                 Field('bio', 'text', default = 'Talk about yourself')
                )
 db.profiling.id.readable = False;
@@ -171,11 +172,12 @@ db.define_table('forums',
                 Field('poster'),
                 Field('specific_campaign') #add ajax here???
     )
-db.forums.specific_campaign.requires=IS_IN_DB(db, db.games.campaign_title,'%(campaign_title)s')
+db.forums.specific_campaign.requires=IS_IN_DB(db, db.games.campaign_title,'%(campaign_title)s', multiple = True)
 db.forums.topic.requires = IS_IN_SET(TOPIC)
 db.forums.topic.required = True
 db.forums.poster.default = get_first_name()
 db.forums.poster.writable = False
+db.forums.specific_campaign.required= False
 db.forums.date_posted.writable = False
 db.forums.date_posted.default = request.now
 
@@ -188,3 +190,4 @@ db.define_table('forumThread',
     )
 db.forumThread.poster.default = get_email()
 db.forumThread.poster.writable = False
+0

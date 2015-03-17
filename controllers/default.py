@@ -91,13 +91,13 @@ def forum():
     #can also act as a looking for group/dm for the users as well
     """Forum base index"""
     editing = request.vars.editing
-    def generate_goto_button(row):
+    def generate_view_button(row):
         b = A('View', _class='btn', _href=URL('default', 'view', args=[row.id]))
         return b
     
     if editing:
         button = ''
-        form = SQLFORM.factory(db.forums)
+        form = SQLFORM.factory(db.forums) #forums Form llowing user to edit
         if form.process().accepted:
             db.forums.insert(body=form.vars.body, title=form.vars.title, topic=form.vars.topic)
             redirect(URL('default', 'forum'))
@@ -105,7 +105,7 @@ def forum():
             response.flash='error'
 
     else:
-        links=[dict(header='', body = generate_goto_button)]
+        links=[dict(header='', body = generate_view_button)]
 
         form = SQLFORM.grid(db.forums, user_signature = False,
                 fields=[db.forums.title, db.forums.topic, db.forums.date_posted, db.forums.poster],
