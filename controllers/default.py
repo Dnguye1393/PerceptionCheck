@@ -70,7 +70,7 @@ def edit():
 
         session.flash = T('Updated')
         redirect(URL('default', 'profile', args=(auth.user.email)))
-    # p.name would contain the name of the poster.
+
     return dict(form=form, editing=emailz)
 
 
