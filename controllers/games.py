@@ -84,6 +84,13 @@ def view():
     p = db.games(request.args(0)) or redirect(URL('games', 'index')) #keep track of info from pervious page
     b = db.party(request.args(0)) #keep track of info on this page
     
+    
+    form = ''
+    button = ''
+    form2 = ''
+    form_add = ''
+    openNumSpotsInc = lambda b: b+1
+    openNumSpotsDec = lambda b: b-1
     openspots = p.open_spots #number of spots open
     destroy = request.vars.delete #delete function
     hello = db.party.campaign_title == p.campaign_title #makeing sure ot match the right campaign
@@ -122,18 +129,13 @@ def view():
 			dict(header = '', body = generate_profile_button),
 			dict(header = '', body = generate_del_button),
 			 ]
-    form = ''
-    button = ''
-    form2 = ''
-    form_add = ''
-    openNumSpotsInc = lambda b: b+1
-    openNumSpotsDec = lambda b: b-1
+    
     if p.open_spots > 0:
             p.update_record(looking_for_players = True)
     if destroy:
         db(db.party.id == request.vars.person).delete()
-        var = db(db.party.id == request.vars.person).select(db.party.accepted)
-        if var:
+        var = b.accepted
+        if var == True:
             p.update_record( open_spots = openNumSpotsInc(openspots)) #increment the counts
         if p.open_spots > 0:
             p.update_record(looking_for_players = True)
