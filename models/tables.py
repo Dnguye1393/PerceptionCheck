@@ -150,6 +150,7 @@ db.revision.body.represent = represent_content
 db.define_table('mssging',
     Field('sender_id', db.auth_user, default=auth.user_id, readable=False, writable=False),
     Field('reciever_email', db.auth_user, readable=False),
+    Field('first_name', default = get_first_name()),
     Field('timesent', 'datetime', default=request.now, readable=False, writable=False),
     Field('subject','string', length=255),
     Field('body', 'text'),
@@ -159,7 +160,7 @@ db.define_table('mssging',
 
 db.mssging.reciever_email.requires=IS_IN_DB(db, db.auth_user.id,'%(email)s') #list of email in the db
 db.mssging.timesent.default = datetime.utcnow()
-
+db.mssging.id.readable = False
 
 
 #List of Threads in a Forum For discussion or finding a Dm/Group
@@ -180,7 +181,7 @@ db.forums.poster.writable = False
 db.forums.specific_campaign.required= False
 db.forums.date_posted.writable = False
 db.forums.date_posted.default = request.now
-
+db.forums.id.readable = False
 #Forum Threads Extension
 db.define_table('forumThread',
                 Field('forumThread_id', readable = False, writable = False),
@@ -190,4 +191,4 @@ db.define_table('forumThread',
     )
 db.forumThread.poster.default = get_email()
 db.forumThread.poster.writable = False
-0
+db.forumThread.id.readable = False
