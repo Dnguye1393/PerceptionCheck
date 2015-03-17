@@ -13,7 +13,8 @@ def index():
     def generate_edit_button(row):
         # If the record is ours, we can edit it.
         b = ''
-        b = A('Edit', _class='btn', _href=URL('games', 'edit', args=[row.id]))
+        if auth.user_id == db.games(row.id).user_id:
+            b = A('Edit', _class='btn', _href=URL('games', 'edit', args=[row.id]))
         return b
     def generate_view_button(row):
 		# view button to go to a seperate page
@@ -25,8 +26,8 @@ def index():
     def generate_del_button(row):
         # If the item is ours we can delete it
         b = ''
-        if auth.user_id == p.user_id:
-            b = A('Ignore Request', _class='btn', _href=URL('games', 'index', args = [request.args(0)], vars = dict(person = row.id, delete= True)))
+        if auth.user_id == db.games(row.id).user_id:
+            b = A('Delete Game', _class='btn', _href=URL('games', 'index', args = [request.args(0)], vars = dict(person = row.id, delete= True)))
         return b
     # Creates extra buttons.
     #if Destroy
@@ -34,6 +35,7 @@ def index():
     links = [
         dict(header='', body = generate_edit_button),
         dict(header='', body = generate_view_button),
+        dict(header='', body = generate_del_button),
         ]
     button = ''
     if show_all:
@@ -84,6 +86,7 @@ def view():
     button = ''
     form2 = ''
     form_add = ''
+    checker = ''
     openNumSpotsInc = lambda b: b+1
     openNumSpotsDec = lambda b: b-1
     openspots = p.open_spots #number of spots open
@@ -132,9 +135,9 @@ def view():
             
     if destroy: #Deleting A request
         db(db.party.id == request.vars.person).delete()
-        var = b.accepted
-        if var == True:
-            p.update_record( open_spots = openNumSpotsInc(openspots)) #increment the counts
+        #supposed to have if statement here to stop extra increments
+        p.update_record( open_spots = openNumSpotsInc(openspots)) #increment the counts
+        
         if p.open_spots > 0:
             p.update_record(looking_for_players = True)
         redirect((URL('games', view, args = [request.args(0)])))
@@ -150,7 +153,7 @@ def view():
               #  redirect(URL('games', 'view', args = [request.args(0)]))
             
             form_add = SQLFORM.grid(db.party, fields = [db.party.requesting_to_join], user_signature= False)
-            db.party.insert(campaign_title = p.campaign_title, players= auth.user.email, requesting_to_join = True)
+            db.party.insert(campaign_title = p.campaign_title, players= auth.user.email, email = auth.user.email, requesting_to_join = True)
         else:
 			#have not requested to join yet
             button = A('Request to Join', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(join= 'y')  ))

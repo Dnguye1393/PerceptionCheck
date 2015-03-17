@@ -6,18 +6,6 @@ import logging
 logging.basicConfig(filename='errors.log', level=logging.DEBUG)
 
 
-def confirm():
-    form = FORM.confirm("Yes")
-    title = request.args(0)
-    if form.accepted:
-        page_id = db.pagetable.insert(title=title)
-        db.revision.insert(page_id=page_id, auth=auth.user.first_name + ' ' + auth.user.last_name)
-        redirect(URL('default', 'index', args=[title], vars=dict(edit='true')))
-#    else:
-#        redirect(URL('default', 'index'))
-
-    return dict(form=form)
-
 @auth.requires_login()
 def login():
     redirect(URL('default', 'index', args=[request.args(0) or 'Main Page'], vars=dict(edit='true')))
@@ -154,6 +142,18 @@ def view():
 
 
 
+
+def confirm():
+    form = FORM.confirm("Yes")
+    title = request.args(0)
+    if form.accepted:
+        page_id = db.pagetable.insert(title=title)
+        db.revision.insert(page_id=page_id, auth=auth.user.first_name + ' ' + auth.user.last_name)
+        redirect(URL('default', 'index', args=[title], vars=dict(edit='true')))
+#    else:
+#        redirect(URL('default', 'index'))
+
+    return dict(form=form)
 
 
 def user():
