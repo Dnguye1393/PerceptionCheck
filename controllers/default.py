@@ -120,6 +120,7 @@ def view():
     """View the Forums"""
     #Tied specifcally to Forums
     row_id = request.args(0)#Grab Everything
+    form2 = ''
     rightOne = db.forums.id == request.args(0)
     title = db.forums(row_id).title
     form = SQLFORM.grid(rightOne, fields=[db.forums.title, db.forums.specific_campaign, db.forums.topic, db.forums.poster, db.forums.date_posted, ],

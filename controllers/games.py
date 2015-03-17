@@ -8,7 +8,7 @@ def index():
     show_all = request.args(0) =='all'
     #q = db.games
     q = (db.games) if show_all else (db.games.looking_for_players == True)
-    
+    destroy = request.vars.delete
     def generate_edit_button(row):
         # If the record is ours, we can edit it.
         b = ''
@@ -21,8 +21,14 @@ def index():
 		return b
     def shorten_post(row):
         return row.description[:10] + '...'
-
+    def generate_del_button(row):
+        # If the item is ours we can delete it
+        b = ''
+        if auth.user_id == p.user_id:
+            b = A('Ignore Request', _class='btn', _href=URL('games', 'index', args = [request.args(0)], vars = dict(person = row.id, delete= True)))
+        return b
     # Creates extra buttons.
+    #if Destroy
     
     links = [
         dict(header='', body = generate_edit_button),
@@ -120,7 +126,7 @@ def view():
         # If the item is ours we can delete it
         b = ''
         if auth.user_id == p.user_id:
-            b = A('Ignore Request', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(person = row.id, delete= 'y')))
+            b = A('Ignore Request', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(person = row.id, delete= True)))
         return b
 
     links = [ 
@@ -130,9 +136,11 @@ def view():
 			dict(header = '', body = generate_del_button),
 			 ]
     
-    if p.open_spots > 0:
+    if p.open_spots > 0: #checks if open spots is here
             p.update_record(looking_for_players = True)
-    if destroy:
+            
+            
+    if destroy: #Deleting A request
         db(db.party.id == request.vars.person).delete()
         var = b.accepted
         if var == True:
@@ -141,18 +149,21 @@ def view():
             p.update_record(looking_for_players = True)
         redirect((URL('games', view, args = [request.args(0)])))
 
+        
     if p.user_id != auth.user_id: #this is for the user, who is not the GM, to request to join
         if isjoin:
-          #  if db.party.players == auth.user.email:
-			#	if 
-				#    session.flash = T('Already Requested.')
-                  #  redirect(URL('games', 'view', args = [request.args(0)]))
-            #If they requested to join
+            if db.party(db.party(request.args(0)).campaign_title == p.campaign_title).email == auth.user.email:
+				    #If they requested to join already
+                session.flash = T('Already Requested.')
+                redirect(URL('games', 'view', args = [request.args(0)]))
+            
             form_add = SQLFORM.grid(db.party, fields = [db.party.requesting_to_join], user_signature= False)
             db.party.insert(campaign_title = p.campaign_title, players= auth.user.email, requesting_to_join = True)
         else:
 			#have not requested to join yet
             button = A('Request to Join', _class='btn', _href=URL('games', 'view', args = [request.args(0)], vars = dict(join= 'y')  ))
+            
+            #accepting the person
     if isaccepted:		
         if p.user_id == auth.user_id: #check to see if accept the person into the group
             changing = db(db.party.id==row_id).select().first()
